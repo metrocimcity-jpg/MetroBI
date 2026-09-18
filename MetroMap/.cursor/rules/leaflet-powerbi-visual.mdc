@@ -1,0 +1,14 @@
+---
+description: Leaflet 1.9.4 and Power BI visual conventions for MetroBI maps
+globs: MetroMap/src/**/*.{ts,less},MetroMap/capabilities.json,MetroMap/pbiviz.json,MetroMap/style/**/*.less
+alwaysApply: false
+---
+
+# Leaflet Power BI visual
+
+- Target Leaflet 1.9.4. Use documented factories (`L.map`, `L.tileLayer.wms`, `L.geoJSON`, `L.circleMarker`).
+- Keep the map instance; `invalidateSize` on resize; `map.remove()` only in `destroy()`.
+- Popup/tooltip strings from data must use DOM `textContent`, never raw HTML.
+- Pair every `settings.ts` slice name with a `capabilities.json` property.
+- Remote tiles, WMS, GeoJSON, and shapefiles require `WebAccess` privileges.
+- Convert shapefiles with `shpjs`, then render through `L.geoJSON`.

@@ -1,6 +1,6 @@
 ---
-description: Leaflet 1.9.4 and Power BI visual conventions for MetroBI maps
-globs: src/**/*.{ts,less},capabilities.json,pbiviz.json,style/**/*.less
+description: Leaflet 1.9.4 and Power BI visual conventions for MetroMap
+globs: MetroMap/src/**/*.{ts,less},MetroMap/capabilities.json,MetroMap/pbiviz.json,MetroMap/style/**/*.less
 alwaysApply: false
 ---
 
@@ -12,3 +12,4 @@ alwaysApply: false
 - Pair every `settings.ts` slice name with a `capabilities.json` property.
 - Remote tiles, WMS, GeoJSON, and shapefiles require `WebAccess` privileges.
 - Convert shapefiles with `shpjs`, then render through `L.geoJSON`.
+- Work in `MetroMap/`; run `pbiviz` from that folder.

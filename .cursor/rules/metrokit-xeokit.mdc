@@ -1,0 +1,14 @@
+---
+description: Xeokit MetroKit visual conventions
+globs: MetroKit/src/**/*.{ts,less},MetroKit/capabilities.json,MetroKit/pbiviz.json
+alwaysApply: false
+---
+
+# MetroKit xeokit visual
+
+- Use `@xeokit/xeokit-sdk` `Viewer`, `XKTLoaderPlugin`, `GLTFLoaderPlugin`, `WebIFCLoaderPlugin`, `NavCubePlugin`.
+- Keep one Viewer; resize the canvas on Power BI resize; `viewer.destroy()` only in `destroy()`.
+- Prefer XKT for large IFC. Parse IFC in-browser only for small files.
+- NavCube needs its own canvas (`canvasElement`), not the main viewer canvas.
+- Pair `settings.ts` slice names with `capabilities.json`.
+- Model URLs need `WebAccess`. Work in `MetroKit/`.

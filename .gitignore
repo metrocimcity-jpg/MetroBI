@@ -6,3 +6,11 @@ dist/
 .DS_Store
 Thumbs.db
 webpack.statistics.prod.html
+MetroMap/node_modules/
+MetroMap/.tmp/
+MetroMap/dist/
+MetroMap/webpack.statistics.prod.html
+MetroKit/node_modules/
+MetroKit/.tmp/
+MetroKit/dist/
+MetroKit/webpack.statistics.prod.html

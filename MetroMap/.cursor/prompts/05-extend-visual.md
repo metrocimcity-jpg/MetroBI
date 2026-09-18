@@ -2,14 +2,14 @@
 
 You are extending MetroBI's Leaflet Power BI visual.
 
-Read `.cursor/skills/leaflet-powerbi-maps/SKILL.md` and `src/leafletMap.ts` first.
+Read `MetroMap/.cursor/skills/leaflet-powerbi-maps/SKILL.md` and `MetroMap/src/leafletMap.ts` first.
 
 Then add the overlay the user names (WMS, GeoJSON, shapefile, image, video, or TMS) using only Leaflet 1.9.4 factories from https://leafletjs.com/reference.html.
 
 Checklist:
 
-- [ ] Format card in `src/settings.ts`
-- [ ] Matching properties in `capabilities.json`
+- [ ] Format card in `MetroMap/src/settings.ts`
+- [ ] Matching properties in `MetroMap/capabilities.json`
 - [ ] Create/destroy the Leaflet layer inside `LeafletMapController.render`
 - [ ] Register in `L.control.layers` if it can be toggled
 - [ ] `WebAccess` privilege if it fetches a URL

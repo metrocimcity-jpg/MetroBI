@@ -9,6 +9,6 @@ Leaflet has no native shapefile layer. Follow this pipeline:
 5. Render with the same `L.geoJSON` helper used for GeoJSON (style, circle markers, popups, highlight).
 6. Add the result to `L.control.layers` as overlay "Shapefile".
 
-Implementation lives in `src/layerLoaders.ts` (`fetchShapefile`) and `src/leafletMap.ts`.
+Implementation lives in `MetroMap/src/layerLoaders.ts` (`fetchShapefile`) and `MetroMap/src/leafletMap.ts`.
 
 Do not try to add `.shp` as a `TileLayer` or `ImageOverlay`. Do not assume shapefile coordinates are already lat/lng — `shpjs` reprojects using `.prj` when present.

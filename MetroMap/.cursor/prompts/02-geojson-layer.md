@@ -2,7 +2,7 @@
 
 Use Leaflet 1.9.4 `L.geoJSON` as documented at https://leafletjs.com/reference.html#geojson and the GeoJSON tutorial.
 
-Update `src/leafletMap.ts` so GeoJSON from the data role and from the format-pane URL share one helper.
+Update `MetroMap/src/leafletMap.ts` so GeoJSON from the data role and from the format-pane URL share one helper.
 
 Requirements:
 

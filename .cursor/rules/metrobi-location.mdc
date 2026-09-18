@@ -1,0 +1,11 @@
+---
+description: MetroBI visuals live in MetroMap and MetroKit folders
+alwaysApply: true
+---
+
+# MetroBI visual locations
+
+- **MetroMap/** — Leaflet map visual (WMS, GeoJSON, shapefile)
+- **MetroKit/** — xeokit 3D model viewer (XKT, glTF, IFC, NavCube)
+
+Run `pbiviz` from the visual's own folder. Model and tile URLs need `WebAccess`.

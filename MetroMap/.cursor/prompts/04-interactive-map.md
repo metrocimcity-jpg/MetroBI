@@ -2,7 +2,7 @@
 
 Use Leaflet Map interaction options and Layer events from https://leafletjs.com/reference.html#map.
 
-Keep these behaviors in `src/leafletMap.ts` and `src/settings.ts`:
+Keep these behaviors in `MetroMap/src/leafletMap.ts` and `MetroMap/src/settings.ts`:
 
 - Map handlers: `dragging`, `scrollWheelZoom`, `doubleClickZoom`, `boxZoom`, `keyboard` — enable/disable at runtime via `handler.enable()` / `handler.disable()`.
 - Controls: `L.control.zoom` (map option `zoomControl`), `L.control.scale()`, `L.control.layers(baseMaps, overlayMaps)`.

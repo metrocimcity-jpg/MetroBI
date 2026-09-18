@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MetroKit xeokit preview</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #d8e4ee; }
+    #myCanvas { width: 100%; height: 100%; display: block; }
+    #myNavCubeCanvas {
+      position: absolute; right: 10px; bottom: 10px; width: 200px; height: 200px;
+    }
+    .hint {
+      position: absolute; left: 12px; top: 12px; z-index: 2;
+      background: rgba(255,255,255,.92); padding: 8px 10px;
+      font: 13px/1.4 Segoe UI, sans-serif; max-width: 360px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas"></canvas>
+  <canvas id="myNavCubeCanvas"></canvas>
+  <div class="hint">
+    <strong>xeokit preview</strong>
+    <div>Orbit drag · pan right-drag or middle · wheel zoom · cube faces snap camera · double-click an object to fly.</div>
+  </div>
+  <script type="module">
+    import { Viewer, NavCubePlugin } from "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.es.min.js";
+
+    const viewer = new Viewer({ canvasId: "myCanvas", transparent: false, dtxEnabled: true });
+    viewer.scene.canvas.backgroundColor = [216/255, 228/255, 238/255];
+    viewer.cameraControl.followPointer = true;
+    viewer.cameraControl.doublePickFlyTo = true;
+    viewer.cameraControl.navMode = "orbit";
+
+    new NavCubePlugin(viewer, {
+      canvasId: "myNavCubeCanvas",
+      visible: true,
+      cameraFly: true,
+      cameraFitFOV: 45,
+      cameraFlyDuration: 0.5
+    });
+
+    viewer.cameraControl.on("picked", (hit) => {
+      if (!hit?.entity) return;
+      viewer.scene.setObjectsHighlighted(viewer.scene.objectIds, false);
+      viewer.scene.setObjectsHighlighted([hit.entity.id], true);
+    });
+  </script>
+</body>
+</html>

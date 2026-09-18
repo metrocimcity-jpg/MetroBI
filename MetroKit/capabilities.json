@@ -1,0 +1,173 @@
+{
+  "dataRoles": [
+    {
+      "name": "objectId",
+      "kind": "Grouping",
+      "displayName": "Object ID",
+      "description": "xeokit / IFC entity id to highlight and cross-filter"
+    },
+    {
+      "name": "label",
+      "kind": "Grouping",
+      "displayName": "Label",
+      "description": "Display name for the picked object"
+    },
+    {
+      "name": "modelUrl",
+      "kind": "Grouping",
+      "displayName": "Model URL",
+      "description": "HTTP URL to an .xkt, .gltf/.glb, or .ifc file"
+    },
+    {
+      "name": "color",
+      "kind": "Measure",
+      "displayName": "Color by"
+    },
+    {
+      "name": "tooltips",
+      "kind": "Grouping",
+      "displayName": "Tooltips"
+    }
+  ],
+  "objects": {
+    "model": {
+      "displayName": "Model",
+      "properties": {
+        "url": { "type": { "text": true } },
+        "format": {
+          "type": {
+            "enumeration": [
+              { "value": "auto", "displayName": "Auto from URL" },
+              { "value": "xkt", "displayName": "XKT" },
+              { "value": "gltf", "displayName": "glTF / GLB" },
+              { "value": "ifc", "displayName": "IFC" }
+            ]
+          }
+        },
+        "edges": { "type": { "bool": true } },
+        "sao": { "type": { "bool": true } },
+        "excludeSpaces": { "type": { "bool": true } }
+      }
+    },
+    "camera": {
+      "displayName": "Camera",
+      "properties": {
+        "navMode": {
+          "type": {
+            "enumeration": [
+              { "value": "orbit", "displayName": "Orbit" },
+              { "value": "firstPerson", "displayName": "First person" },
+              { "value": "planView", "displayName": "Plan view" }
+            ]
+          }
+        },
+        "projection": {
+          "type": {
+            "enumeration": [
+              { "value": "perspective", "displayName": "Perspective" },
+              { "value": "ortho", "displayName": "Orthographic" }
+            ]
+          }
+        },
+        "fitOnLoad": { "type": { "bool": true } },
+        "doublePickFlyTo": { "type": { "bool": true } },
+        "followPointer": { "type": { "bool": true } },
+        "pivot": { "type": { "bool": true } }
+      }
+    },
+    "navCube": {
+      "displayName": "3D cube",
+      "properties": {
+        "show": { "type": { "bool": true } },
+        "size": { "type": { "numeric": true } },
+        "alignment": {
+          "type": {
+            "enumeration": [
+              { "value": "bottomRight", "displayName": "Bottom right" },
+              { "value": "bottomLeft", "displayName": "Bottom left" },
+              { "value": "topRight", "displayName": "Top right" },
+              { "value": "topLeft", "displayName": "Top left" }
+            ]
+          }
+        },
+        "cameraFly": { "type": { "bool": true } }
+      }
+    },
+    "appearance": {
+      "displayName": "Appearance",
+      "properties": {
+        "background": { "type": { "fill": { "solid": { "color": true } } } },
+        "highlightColor": { "type": { "fill": { "solid": { "color": true } } } },
+        "xrayOthers": { "type": { "bool": true } }
+      }
+    },
+    "selection": {
+      "displayName": "Selection",
+      "properties": {
+        "crossFilter": { "type": { "bool": true } }
+      }
+    }
+  },
+  "dataViewMappings": [
+    {
+      "conditions": [
+        {},
+        {
+          "objectId": { "max": 1 },
+          "label": { "max": 1 },
+          "modelUrl": { "max": 1 },
+          "color": { "max": 1 },
+          "tooltips": { "max": 8 }
+        }
+      ],
+      "categorical": {
+        "categories": {
+          "select": [
+            { "for": { "in": "objectId" } },
+            { "for": { "in": "label" } },
+            { "for": { "in": "modelUrl" } },
+            { "for": { "in": "tooltips" } }
+          ],
+          "dataReductionAlgorithm": { "top": { "count": 30000 } }
+        },
+        "values": {
+          "select": [
+            { "bind": { "to": "color" } }
+          ]
+        }
+      }
+    }
+  ],
+  "privileges": [
+    {
+      "name": "WebAccess",
+      "essential": true,
+      "parameters": [
+        "https://*",
+        "http://*",
+        "http://localhost",
+        "http://localhost:80",
+        "http://localhost:*",
+        "http://127.0.0.1",
+        "http://127.0.0.1:80",
+        "http://127.0.0.1:*",
+        "https://localhost",
+        "https://localhost:*",
+        "https://127.0.0.1",
+        "https://127.0.0.1:*"
+      ]
+    }
+  ],
+  "supportsHighlight": true,
+  "supportsLandingPage": true,
+  "supportsEmptyDataView": true,
+  "supportsKeyboardFocus": true,
+  "tooltips": {
+    "supportedTypes": {
+      "default": true,
+      "canvas": true
+    },
+    "roles": ["tooltips"]
+  },
+  "sorting": { "default": {} }
+}
