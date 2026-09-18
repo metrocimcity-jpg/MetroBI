@@ -10,6 +10,7 @@ alwaysApply: false
 - Keep the map instance; `invalidateSize` on resize; `map.remove()` only in `destroy()`.
 - Popup/tooltip strings from data must use DOM `textContent`, never raw HTML.
 - Pair every `settings.ts` slice name with a `capabilities.json` property.
-- Remote tiles, WMS, GeoJSON, and shapefiles require `WebAccess` privileges.
-- Convert shapefiles with `shpjs`, then render through `L.geoJSON`.
-- Work in `MetroMap/`; run `pbiviz` from that folder.
+- Format pane must persist with no data: `supportsEmptyDataView`, `selector: null`, `forceNullSelectors`, `applyFormattingObjects`. Treat Style updates as format changes, not resize-only.
+- Remote tiles, WMS, GeoJSON, and shapefiles require `WebAccess` (localhost entries are not covered by `http://*`).
+- Shapefile is a Format pane URL, not a field well. Convert with `shpjs`, then `L.geoJSON`.
+- Work in `MetroMap/`; run `pbiviz` from that folder. No Format-pane file picker.

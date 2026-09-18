@@ -15,6 +15,21 @@ import VisualUpdateType = powerbi.VisualUpdateType;
 import { VisualFormattingSettingsModel } from "./settings";
 import { mapDataView } from "./dataView";
 import { LeafletMapController } from "./leafletMap";
+import { applyFormattingObjects, enumerateObjectCard } from "./format";
+import { forceNullSelectors } from "./formattingModel";
+import { METROMAP_VERSION } from "./version";
+
+function readMetadataObjects(
+    dataViews: powerbi.DataView[] | undefined
+): { dataView: powerbi.DataView | undefined; objects: { [name: string]: { [name: string]: unknown } } | undefined } {
+    for (const dataView of dataViews || []) {
+        const objects = dataView?.metadata?.objects as { [name: string]: { [name: string]: unknown } } | undefined;
+        if (objects && Object.keys(objects).length) {
+            return { dataView, objects };
+        }
+    }
+    return { dataView: dataViews && dataViews[0], objects: undefined };
+}
 
 export class Visual implements IVisual {
     private readonly host: powerbi.extensibility.visual.IVisualHost;
@@ -22,7 +37,7 @@ export class Visual implements IVisual {
     private readonly formattingSettingsService: FormattingSettingsService;
     private readonly selectionManager: ISelectionManager;
     private readonly mapController: LeafletMapController;
-    private formattingSettings: VisualFormattingSettingsModel;
+    private formattingSettings: VisualFormattingSettingsModel = new VisualFormattingSettingsModel();
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -32,40 +47,48 @@ export class Visual implements IVisual {
         this.mapController = new LeafletMapController(
             options.element,
             this.selectionManager,
-            () => Boolean(this.host.hostCapabilities?.allowInteractions !== false)
+            () => Boolean(this.host.hostCapabilities?.allowInteractions !== false),
+            METROMAP_VERSION
         );
     }
 
     public update(options: VisualUpdateOptions): void {
+        const { dataView, objects } = readMetadataObjects(options.dataViews);
+
+        if (objects) {
+            const next = new VisualFormattingSettingsModel();
+            applyFormattingObjects(next.cards, objects);
+            this.formattingSettings = next;
+        }
+
+        const resizeOnly = Boolean(options.type & VisualUpdateType.Resize) &&
+            !(options.type & VisualUpdateType.Data) &&
+            !(options.type & VisualUpdateType.ViewMode) &&
+            !(options.type & VisualUpdateType.Style);
+
         this.events.renderingStarted(options);
         try {
-            const dataView = options.dataViews && options.dataViews[0];
-            this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(
-                VisualFormattingSettingsModel,
-                dataView
-            );
-
-            const resizeOnly = Boolean(options.type & VisualUpdateType.Resize) &&
-                !(options.type & VisualUpdateType.Data) &&
-                !(options.type & VisualUpdateType.ViewMode);
-
             if (resizeOnly) {
                 this.mapController.resize();
-                this.events.renderingFinished(options);
-                return;
+            } else {
+                void this.mapController.render(this.formattingSettings, mapDataView(dataView, this.host));
             }
-
-            const data = mapDataView(dataView, this.host);
-            void this.mapController.render(this.formattingSettings, data)
-                .then(() => this.events.renderingFinished(options))
-                .catch((error) => this.events.renderingFailed(options, String(error)));
+            this.events.renderingFinished(options);
         } catch (error) {
             this.events.renderingFailed(options, String(error));
         }
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel {
-        return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
+        return forceNullSelectors(
+            this.formattingSettingsService.buildFormattingModel(this.formattingSettings)
+        );
+    }
+
+    public enumerateObjectInstances(
+        options: powerbi.EnumerateVisualObjectInstancesOptions
+    ): powerbi.VisualObjectInstanceEnumeration {
+        return enumerateObjectCard(this.formattingSettings.cards, options.objectName);
     }
 
     public destroy(): void {

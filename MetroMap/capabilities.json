@@ -160,6 +160,7 @@
   "dataViewMappings": [
     {
       "conditions": [
+        {},
         {
           "category": { "max": 1 },
           "latitude": { "max": 1 },
@@ -194,11 +195,25 @@
     {
       "name": "WebAccess",
       "essential": true,
-      "parameters": ["https://*", "http://*"]
+      "parameters": [
+        "https://*",
+        "http://*",
+        "http://localhost",
+        "http://localhost:80",
+        "http://localhost:*",
+        "http://127.0.0.1",
+        "http://127.0.0.1:80",
+        "http://127.0.0.1:*",
+        "https://localhost",
+        "https://localhost:*",
+        "https://127.0.0.1",
+        "https://127.0.0.1:*"
+      ]
     }
   ],
   "supportsHighlight": true,
   "supportsLandingPage": true,
+  "supportsEmptyDataView": true,
   "supportsKeyboardFocus": true,
   "tooltips": {
     "supportedTypes": {

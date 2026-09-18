@@ -41,4 +41,4 @@ Path style: `stroke`, `color`, `weight`, `opacity`, `fill`, `fillColor`, `fillOp
 
 Leaflet methods take `[lat, lng]`. GeoJSON coordinates are `[lng, lat]`. `L.GeoJSON` converts them with `coordsToLatLng`.
 
-Shapefiles are not native Leaflet layers. Parse to GeoJSON (WGS84) first.
+Shapefiles are not native Leaflet layers. Parse to GeoJSON (WGS84) first. In Power BI the shapefile source is **Format → Shapefile layer → URL**, not a field well. Format pane properties persist with no data bound (`supportsEmptyDataView`, visual-level `selector: null`).

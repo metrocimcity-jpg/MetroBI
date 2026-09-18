@@ -9,18 +9,20 @@ Official docs:
 
 | Tutorial | Leaflet API | Visual behavior |
 | --- | --- | --- |
-| Quick start | `L.map`, `L.tileLayer`, `L.circle`, `bindPopup`, `map.on('click')` | Map host, OSM basemap, CircleMarker points, popups |
+| Quick start | `L.map`, `L.tileLayer`, `L.circle`, `bindPopup`, `map.on('click')` | Map host, Esri/Carto basemap (not `tile.openstreetmap.org`), CircleMarker points, popups |
 | Mobile | 100% height, `locate` | Visual fills the Power BI viewport; geolocation is off in the sandbox by default |
 | Custom icons | `L.icon`, `L.Icon.extend` | CircleMarkers avoid default icon URLs in the pbiviz bundle |
 | Accessible maps | `alt` / `title`, keyboard | Keyboard handler stays on; popup text is unique per feature |
-| GeoJSON | `L.geoJSON` `style`, `pointToLayer`, `onEachFeature`, `filter` | Data-role GeoJSON + URL GeoJSON |
+| GeoJSON | `L.geoJSON` `style`, `pointToLayer`, `onEachFeature`, `filter` | Data-role GeoJSON **and** Format pane GeoJSON URL |
 | Choropleth | `getColor`, `resetStyle`, info/legend controls | Color by measure, hover highlight |
 | Layer groups | `L.layerGroup`, `L.control.layers` | Basemap / WMS / GeoJSON / shapefile / points |
 | Zoom levels | `zoomSnap`, `fitBounds`, `setZoom` | Map format card |
 | CRS.Simple | `L.CRS.Simple` | Not default; geographic CRS only (3857 / 4326) |
-| WMS and TMS | `L.tileLayer.wms`, `tms: true` | WMS card + basemap TMS toggle |
+| WMS and TMS | `L.tileLayer.wms`, `tms: true` | WMS **Format pane** card + basemap TMS toggle |
 | Map panes | `createPane`, z-index | Default panes; WMS `setZIndex` |
-| Overlays | `L.imageOverlay` | Image overlay card |
+| Overlays | `L.imageOverlay` | Image overlay Format pane card |
+
+WMS, shapefile, GeoJSON URL, and image overlay persist on the landing page (`supportsEmptyDataView`, visual-level `selector: null`). Shapefile is not a field well.
 
 ## API classes wired in code
 

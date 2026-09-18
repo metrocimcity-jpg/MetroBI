@@ -1,10 +1,21 @@
 "use strict";
 
+import powerbi from "powerbi-visuals-api";
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 import Card = formattingSettings.SimpleCard;
 import Model = formattingSettings.Model;
 import Slice = formattingSettings.Slice;
+
+const UNBOUND_SELECTOR = null as unknown as powerbi.data.Selector;
+
+function bindUnboundSelectors(cards: Card[]): void {
+    for (const card of cards) {
+        for (const slice of card.slices || []) {
+            (slice as formattingSettings.SimpleSlice).selector = UNBOUND_SELECTOR;
+        }
+    }
+}
 
 class MapCard extends Card {
     centerLat = new formattingSettings.NumUpDown({
@@ -245,4 +256,9 @@ export class VisualFormattingSettingsModel extends Model {
         this.map, this.interaction, this.basemap, this.wms,
         this.geojson, this.shapefile, this.points, this.imageOverlay
     ];
+
+    constructor() {
+        super();
+        bindUnboundSelectors(this.cards);
+    }
 }

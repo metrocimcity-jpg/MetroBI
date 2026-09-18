@@ -32,7 +32,7 @@ It loads **XKT**, **glTF/GLB**, and **IFC**, with orbit/pan/zoom, object pick, a
 - **Appearance** — background, highlight, X-ray others
 - **Selection** — cross-filter on pick
 
-Paste a model URL in Format → Model → Model URL (or bind the Model URL field well). HTTPS hosts and `http://localhost` / `http://127.0.0.1` are allowed. The model host must send CORS headers. Power BI needs the visual’s `WebAccess` privilege. After changing the URL, click outside the box so the value commits.
+Paste a model URL in Format → Model → Model URL (or bind the Model URL field well). Settings persist with **no fields bound**. HTTPS hosts and `http://localhost` / `http://127.0.0.1` are allowed. The model host must send CORS headers. Power BI needs the visual’s `WebAccess` privilege. After changing the URL, press Enter or click outside the box so the value commits. There is no Browse/file picker in the Format pane.
 
 ## Develop
 
@@ -56,12 +56,27 @@ Standalone preview (no Power BI):
 - OSM-style 403s do not apply here; models load over HTTPS from the URL you set.
 - Large IFC files should be converted to XKT instead of parsed in the browser.
 
+## Cursor prompts
+
+Attach any file in `MetroKit/.cursor/prompts/`:
+
+| Prompt | Use when |
+| --- | --- |
+| [00-format-pane.md](.cursor/prompts/00-format-pane.md) | Format pane URL/toggles with no fields bound |
+| [01-load-model.md](.cursor/prompts/01-load-model.md) | XKT / glTF / IFC load and CORS |
+| [02-navcube-camera.md](.cursor/prompts/02-navcube-camera.md) | orbit camera and 3D cube |
+| [03-picking.md](.cursor/prompts/03-picking.md) | pick, highlight, cross-filter |
+| [04-extend-visual.md](.cursor/prompts/04-extend-visual.md) | add a Format setting or loader path |
+
+Project skill: `.cursor/skills/xeokit-metrokit/`. Rule: `.cursor/rules/metrokit-xeokit.mdc`.
+
 ## Architecture
 
 ```
-src/visual.ts         Power BI IVisual
-src/settings.ts       Format pane
-src/dataView.ts       Object ID / URL field wells
-src/xeokitViewer.ts   Viewer, loaders, NavCube, picking
-src/format.ts         URL format detection
+src/visual.ts          Power BI IVisual, Format persist, resize vs data
+src/settings.ts        Format pane cards (selector null; match capabilities)
+src/format.ts          Unwrap persisted objects; enumerateObjectInstances
+src/formattingModel.ts Null selectors for getFormattingModel
+src/dataView.ts        Object ID / URL field wells
+src/xeokitViewer.ts    Viewer, ArrayBuffer loaders, NavCube, picking
 ```

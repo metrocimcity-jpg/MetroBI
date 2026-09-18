@@ -69,12 +69,18 @@ export class LeafletMapController {
     constructor(
         private readonly hostElement: HTMLElement,
         private readonly selectionManager: ISelectionManager,
-        private readonly allowInteractions: () => boolean
+        private readonly allowInteractions: () => boolean,
+        version: string
     ) {
         this.hostElement.classList.add("leaflet-map-host");
         this.statusEl = document.createElement("div");
         this.statusEl.className = "metrobi-status";
         this.hostElement.appendChild(this.statusEl);
+
+        const versionEl = document.createElement("div");
+        versionEl.className = "metromap-version";
+        versionEl.textContent = `MetroMap ${version}`;
+        this.hostElement.appendChild(versionEl);
     }
 
     public resize(): void {

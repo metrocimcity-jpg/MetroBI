@@ -11,4 +11,6 @@ alwaysApply: false
 - Prefer XKT for large IFC. Parse IFC in-browser only for small files.
 - NavCube needs its own canvas (`canvasElement`), not the main viewer canvas.
 - Pair `settings.ts` slice names with `capabilities.json`.
-- Model URLs need `WebAccess`. Work in `MetroKit/`.
+- Format pane must persist with no data: `supportsEmptyDataView`, slice `selector: null`, `forceNullSelectors`, `applyFormattingObjects`.
+- Model URLs need `WebAccess` including explicit localhost. Fetch as `ArrayBuffer` (CORS). Work in `MetroKit/`.
+- Do not wait `renderingFinished` on model load. No Format-pane file picker.

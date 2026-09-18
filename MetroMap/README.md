@@ -31,7 +31,7 @@ Shapefiles are not a Leaflet class. Leaflet only understands GeoJSON vectors and
 | GeoJSON | Feature or FeatureCollection text per row |
 | Tooltips | Extra popup rows |
 
-WMS, shapefile, GeoJSON URL, and image overlay are format-pane URLs, not field wells. Layer hosts must send CORS headers. Power BI blocks the request without the visual's `WebAccess` privilege.
+WMS, shapefile, GeoJSON URL, and image overlay are format-pane URLs, not field wells. They persist without fields bound (`supportsEmptyDataView`). Press Enter or click outside a URL box to commit. Layer hosts must send CORS headers. Power BI blocks the request without the visual's `WebAccess` privilege, including `http://localhost`.
 
 ## Format pane
 
@@ -75,23 +75,26 @@ Sample point data for Power BI is in `docs/sample-points.csv`.
 
 ## Cursor prompts
 
-Attach any file in `.cursor/prompts/` (from the repo, `MetroMap/.cursor/prompts/`) to a Cursor chat when you want the agent to extend one capability:
+Attach any file in `MetroMap/.cursor/prompts/` when extending a capability:
 
 | Prompt | Use when |
 | --- | --- |
+| [00-format-pane.md](.cursor/prompts/00-format-pane.md) | Format pane URL/toggles with no fields bound |
 | [01-wms-layer.md](.cursor/prompts/01-wms-layer.md) | WMS / TMS / `setParams` |
 | [02-geojson-layer.md](.cursor/prompts/02-geojson-layer.md) | GeoJSON style, hover, choropleth |
 | [03-shapefile-layer.md](.cursor/prompts/03-shapefile-layer.md) | shpjs → GeoJSON pipeline |
 | [04-interactive-map.md](.cursor/prompts/04-interactive-map.md) | handlers, controls, cross-filter |
 | [05-extend-visual.md](.cursor/prompts/05-extend-visual.md) | add a new overlay type |
 
-Project skill: `.cursor/skills/leaflet-powerbi-maps/`. Rule: `.cursor/rules/leaflet-powerbi-visual.mdc`. API mapping: [docs/leaflet-api-for-powerbi.md](docs/leaflet-api-for-powerbi.md).
+Project skill: `MetroMap/.cursor/skills/leaflet-powerbi-maps/`. Rule: `.cursor/rules/metromap-leaflet.mdc`. API mapping: [docs/leaflet-api-for-powerbi.md](docs/leaflet-api-for-powerbi.md).
 
 ## Architecture
 
 ```
 src/visual.ts          Power BI IVisual, formatting model, resize vs data updates
 src/settings.ts        Format pane cards (must match capabilities.json)
+src/format.ts          Persist Format pane values without bound data
+src/formattingModel.ts Null selectors for visual-level properties
 src/dataView.ts        Categorical field wells → rows and selection IDs
 src/leafletMap.ts      L.Map lifecycle and all overlay factories
 src/layerLoaders.ts    fetch GeoJSON / shapefile
