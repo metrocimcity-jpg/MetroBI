@@ -1,0 +1,25 @@
+{
+  "name": "leaflet-interactive-map",
+  "description": "Power BI custom visual: interactive Leaflet maps with WMS, GeoJSON, and shapefile layers",
+  "version": "1.0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "pbiviz": "pbiviz",
+    "start": "pbiviz start",
+    "package": "pbiviz package",
+    "lint": "npx eslint ."
+  },
+  "dependencies": {
+    "@types/geojson": "7946.0.16",
+    "@types/leaflet": "1.9.16",
+    "leaflet": "1.9.4",
+    "powerbi-visuals-api": "5.11.1",
+    "powerbi-visuals-utils-formattingmodel": "6.0.4",
+    "shpjs": "6.1.0"
+  },
+  "devDependencies": {
+    "@types/shpjs": "3.4.7",
+    "powerbi-visuals-tools": "6.2.0",
+    "typescript": "5.5.4"
+  }
+}

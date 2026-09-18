@@ -1,0 +1,211 @@
+{
+  "dataRoles": [
+    {
+      "name": "category",
+      "kind": "Grouping",
+      "displayName": "Category",
+      "description": "Feature label used in popups, tooltips, and accessibility alt text"
+    },
+    {
+      "name": "latitude",
+      "kind": "Grouping",
+      "displayName": "Latitude",
+      "description": "WGS84 latitude for point markers"
+    },
+    {
+      "name": "longitude",
+      "kind": "Grouping",
+      "displayName": "Longitude",
+      "description": "WGS84 longitude for point markers"
+    },
+    {
+      "name": "size",
+      "kind": "Measure",
+      "displayName": "Size",
+      "description": "Numeric value that scales CircleMarker radius"
+    },
+    {
+      "name": "color",
+      "kind": "Measure",
+      "displayName": "Color by",
+      "description": "Numeric value for choropleth / point color"
+    },
+    {
+      "name": "geojson",
+      "kind": "Grouping",
+      "displayName": "GeoJSON",
+      "description": "GeoJSON text (Feature or FeatureCollection) per row"
+    },
+    {
+      "name": "tooltips",
+      "kind": "Grouping",
+      "displayName": "Tooltips"
+    }
+  ],
+  "objects": {
+    "map": {
+      "displayName": "Map",
+      "properties": {
+        "centerLat": { "type": { "numeric": true } },
+        "centerLng": { "type": { "numeric": true } },
+        "zoom": { "type": { "numeric": true } },
+        "minZoom": { "type": { "numeric": true } },
+        "maxZoom": { "type": { "numeric": true } },
+        "zoomSnap": { "type": { "numeric": true } },
+        "zoomDelta": { "type": { "numeric": true } },
+        "fitToData": { "type": { "bool": true } },
+        "preferCanvas": { "type": { "bool": true } },
+        "crs": {
+          "type": {
+            "enumeration": [
+              { "value": "EPSG3857", "displayName": "EPSG:3857 (Web Mercator)" },
+              { "value": "EPSG4326", "displayName": "EPSG:4326 (WGS84)" }
+            ]
+          }
+        }
+      }
+    },
+    "interaction": {
+      "displayName": "Interaction",
+      "properties": {
+        "dragging": { "type": { "bool": true } },
+        "scrollWheelZoom": { "type": { "bool": true } },
+        "doubleClickZoom": { "type": { "bool": true } },
+        "boxZoom": { "type": { "bool": true } },
+        "keyboard": { "type": { "bool": true } },
+        "zoomControl": { "type": { "bool": true } },
+        "scaleControl": { "type": { "bool": true } },
+        "layersControl": { "type": { "bool": true } },
+        "crossFilter": { "type": { "bool": true } }
+      }
+    },
+    "basemap": {
+      "displayName": "Basemap",
+      "properties": {
+        "provider": {
+          "type": {
+            "enumeration": [
+              { "value": "esriStreet", "displayName": "Esri World Street" },
+              { "value": "esriTopo", "displayName": "Esri World Topo" },
+              { "value": "esriImagery", "displayName": "Esri World Imagery" },
+              { "value": "cartoVoyager", "displayName": "Carto Voyager (OSM style)" },
+              { "value": "cartoLight", "displayName": "Carto Positron" },
+              { "value": "cartoDark", "displayName": "Carto Dark Matter" },
+              { "value": "osm", "displayName": "OpenStreetMap via Carto" },
+              { "value": "none", "displayName": "None (WMS / overlay only)" }
+            ]
+          }
+        },
+        "opacity": { "type": { "numeric": true } },
+        "tms": { "type": { "bool": true } }
+      }
+    },
+    "wms": {
+      "displayName": "WMS layer",
+      "properties": {
+        "show": { "type": { "bool": true } },
+        "url": { "type": { "text": true } },
+        "layers": { "type": { "text": true } },
+        "styles": { "type": { "text": true } },
+        "format": { "type": { "text": true } },
+        "transparent": { "type": { "bool": true } },
+        "version": { "type": { "text": true } },
+        "opacity": { "type": { "numeric": true } },
+        "uppercase": { "type": { "bool": true } },
+        "asBasemap": { "type": { "bool": true } }
+      }
+    },
+    "geojson": {
+      "displayName": "GeoJSON layer",
+      "properties": {
+        "url": { "type": { "text": true } },
+        "color": { "type": { "fill": { "solid": { "color": true } } } },
+        "weight": { "type": { "numeric": true } },
+        "fillOpacity": { "type": { "numeric": true } },
+        "highlight": { "type": { "bool": true } },
+        "zoomOnClick": { "type": { "bool": true } },
+        "choropleth": { "type": { "bool": true } }
+      }
+    },
+    "shapefile": {
+      "displayName": "Shapefile layer",
+      "properties": {
+        "url": { "type": { "text": true } },
+        "color": { "type": { "fill": { "solid": { "color": true } } } },
+        "weight": { "type": { "numeric": true } },
+        "fillOpacity": { "type": { "numeric": true } }
+      }
+    },
+    "points": {
+      "displayName": "Point markers",
+      "properties": {
+        "radius": { "type": { "numeric": true } },
+        "color": { "type": { "fill": { "solid": { "color": true } } } },
+        "fillOpacity": { "type": { "numeric": true } },
+        "weight": { "type": { "numeric": true } }
+      }
+    },
+    "imageOverlay": {
+      "displayName": "Image overlay",
+      "properties": {
+        "url": { "type": { "text": true } },
+        "north": { "type": { "numeric": true } },
+        "south": { "type": { "numeric": true } },
+        "east": { "type": { "numeric": true } },
+        "west": { "type": { "numeric": true } },
+        "opacity": { "type": { "numeric": true } }
+      }
+    }
+  },
+  "dataViewMappings": [
+    {
+      "conditions": [
+        {
+          "category": { "max": 1 },
+          "latitude": { "max": 1 },
+          "longitude": { "max": 1 },
+          "size": { "max": 1 },
+          "color": { "max": 1 },
+          "geojson": { "max": 1 },
+          "tooltips": { "max": 8 }
+        }
+      ],
+      "categorical": {
+        "categories": {
+          "select": [
+            { "for": { "in": "category" } },
+            { "for": { "in": "latitude" } },
+            { "for": { "in": "longitude" } },
+            { "for": { "in": "geojson" } },
+            { "for": { "in": "tooltips" } }
+          ],
+          "dataReductionAlgorithm": { "top": { "count": 30000 } }
+        },
+        "values": {
+          "select": [
+            { "bind": { "to": "size" } },
+            { "bind": { "to": "color" } }
+          ]
+        }
+      }
+    }
+  ],
+  "privileges": [
+    {
+      "name": "WebAccess",
+      "essential": true,
+      "parameters": ["https://*", "http://*"]
+    }
+  ],
+  "supportsHighlight": true,
+  "supportsLandingPage": true,
+  "supportsKeyboardFocus": true,
+  "tooltips": {
+    "supportedTypes": {
+      "default": true,
+      "canvas": true
+    },
+    "roles": ["tooltips"]
+  },
+  "sorting": { "default": {} }
+}

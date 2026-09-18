@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MetroBI Leaflet preview</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <style>
+    html, body, #map { height: 100%; margin: 0; }
+    .panel {
+      position: absolute; z-index: 1000; top: 12px; left: 52px;
+      background: rgba(255,255,255,.92); padding: 8px 10px; font: 13px/1.4 Segoe UI, sans-serif;
+      max-width: 360px;
+    }
+    .panel input { width: 100%; margin: 4px 0 8px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="panel">
+    <strong>Leaflet 1.9.4 layer preview</strong>
+    <div>Basemap + WMS + GeoJSON. Add a shapefile zip to test shpjs.</div>
+    <label>Shapefile .zip<input id="shp" type="file" accept=".zip,.shp" /></label>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/shpjs@0.6.0/dist/shp.min.js"></script>
+  <script>
+    const map = L.map("map", { worldCopyJump: true, zoomSnap: 0.5 }).setView([32.4, 53.1], 5);
+    const osm = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19, attribution: "Tiles &copy; Esri", referrerPolicy: "no-referrer"
+    }).addTo(map);
+    const wms = L.tileLayer.wms("https://ows.mundialis.de/services/service?", {
+      layers: "SRTM30-Colored-Hillshade", format: "image/png", transparent: true, opacity: 0.45
+    }).addTo(map);
+    fetch("sample.geojson").then((r) => r.json()).then((data) => {
+      const geo = L.geoJSON(data, {
+        style: (f) => ({ color: "#3388ff", weight: 2, fillOpacity: 0.35, fillColor: (f.properties.density || 0) > 50 ? "#e31a1c" : "#fed976" }),
+        pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 8, color: "#3388ff", fillOpacity: 0.8 }),
+        onEachFeature: (f, layer) => {
+          const el = document.createElement("div");
+          el.textContent = f.properties.name + " density " + f.properties.density;
+          layer.bindPopup(el);
+          layer.on({
+            mouseover: (e) => e.target.setStyle({ weight: 4 }),
+            mouseout: (e) => geo.resetStyle(e.target),
+            click: (e) => map.fitBounds(e.target.getBounds ? e.target.getBounds() : L.latLngBounds([e.latlng]))
+          });
+        }
+      }).addTo(map);
+      L.control.layers({ OpenStreetMap: osm }, { WMS: wms, GeoJSON: geo }).addTo(map);
+      L.control.scale().addTo(map);
+    });
+    document.getElementById("shp").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file || typeof shp !== "function") return;
+      const geo = await shp(await file.arrayBuffer());
+      L.geoJSON(geo, { style: { color: "#e31a1c", weight: 2, fillOpacity: 0.3 } }).addTo(map);
+    });
+  </script>
+</body>
+</html>

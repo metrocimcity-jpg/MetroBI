@@ -1,0 +1,26 @@
+{
+  "visual": {
+    "name": "leafletInteractiveMap",
+    "displayName": "Leaflet Interactive Map",
+    "guid": "leafletInteractiveMapA9C3E7F2B1D84",
+    "visualClassName": "Visual",
+    "version": "1.0.0.0",
+    "description": "Interactive Leaflet 1.9.4 map for Power BI. Loads WMS, GeoJSON, and shapefile layers, draws lat/lng points, and supports popups, tooltips, choropleth styling, layer control, and cross-filtering.",
+    "supportUrl": "https://leafletjs.com/reference.html",
+    "gitHubUrl": "https://github.com/Leaflet/Leaflet"
+  },
+  "apiVersion": "5.11.1",
+  "author": {
+    "name": "MetroBI",
+    "email": "metrobi@local"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": null,
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": [],
+  "version": "1.0.0.0"
+}

@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Tehran", "density": 118 },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[51.2, 35.55], [51.6, 35.55], [51.6, 35.85], [51.2, 35.85], [51.2, 35.55]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Isfahan", "density": 42 },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[51.5, 32.5], [51.85, 32.5], [51.85, 32.8], [51.5, 32.8], [51.5, 32.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Shiraz", "density": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [52.53, 29.61]
+      }
+    }
+  ]
+}
