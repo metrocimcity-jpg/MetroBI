@@ -1,5 +1,5 @@
 ---
-description: MetroBI visuals live in MetroMap and MetroKit folders
+description: MetroBI visuals live in MetroMap, MetroKit, MetroD3, and MetroKit-Excel
 alwaysApply: true
 ---
 
@@ -7,5 +7,7 @@ alwaysApply: true
 
 - **MetroMap/** — Leaflet map visual (WMS, GeoJSON, shapefile)
 - **MetroKit/** — xeokit 3D model viewer (XKT, glTF, IFC, NavCube)
+- **MetroD3/** — D3 zoomable sunburst (Observable @d3/zoomable-sunburst)
+- **MetroKit-Excel/** — Excel add-in: xeokit viewer embedded on the sheet, settings in a show/hide task pane
 
-Run `pbiviz` from the visual's own folder. Model and tile URLs need `WebAccess`.
+Run `pbiviz` from the visual's own folder. Remote URLs need `WebAccess`. Run MetroKit-Excel from `MetroKit-Excel/` (`npm start` / `npm run preview`).

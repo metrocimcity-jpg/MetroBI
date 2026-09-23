@@ -1,0 +1,116 @@
+{
+  "dataRoles": [
+    {
+      "name": "category",
+      "kind": "Grouping",
+      "displayName": "Category",
+      "description": "Hierarchy levels, outermost first (like flare / analytics / cluster)"
+    },
+    {
+      "name": "value",
+      "kind": "Measure",
+      "displayName": "Value",
+      "description": "Numeric size of each leaf"
+    },
+    {
+      "name": "tooltips",
+      "kind": "Grouping",
+      "displayName": "Tooltips"
+    }
+  ],
+  "objects": {
+    "chart": {
+      "displayName": "Chart",
+      "properties": {
+        "duration": { "type": { "numeric": true } },
+        "showLabels": { "type": { "bool": true } }
+      }
+    },
+    "appearance": {
+      "displayName": "Appearance",
+      "properties": {
+        "background": { "type": { "fill": { "solid": { "color": true } } } },
+        "fontSize": { "type": { "numeric": true } },
+        "colorScheme": {
+          "type": {
+            "enumeration": [
+              { "value": "rainbow", "displayName": "Rainbow (Observable)" },
+              { "value": "tableau", "displayName": "Tableau 10" },
+              { "value": "category10", "displayName": "Category 10" }
+            ]
+          }
+        }
+      }
+    },
+    "selection": {
+      "displayName": "Selection",
+      "properties": {
+        "crossFilter": { "type": { "bool": true } }
+      }
+    },
+    "data": {
+      "displayName": "Data URL",
+      "properties": {
+        "jsonUrl": { "type": { "text": true } }
+      }
+    }
+  },
+  "dataViewMappings": [
+    {
+      "conditions": [
+        {},
+        {
+          "category": { "max": 8 },
+          "value": { "max": 1 },
+          "tooltips": { "max": 8 }
+        }
+      ],
+      "categorical": {
+        "categories": {
+          "select": [
+            { "for": { "in": "category" } },
+            { "for": { "in": "tooltips" } }
+          ],
+          "dataReductionAlgorithm": { "top": { "count": 30000 } }
+        },
+        "values": {
+          "select": [
+            { "bind": { "to": "value" } }
+          ]
+        }
+      }
+    }
+  ],
+  "privileges": [
+    {
+      "name": "WebAccess",
+      "essential": false,
+      "parameters": [
+        "https://*",
+        "http://*",
+        "http://localhost",
+        "http://localhost:80",
+        "http://localhost:*",
+        "http://127.0.0.1",
+        "http://127.0.0.1:80",
+        "http://127.0.0.1:*",
+        "https://localhost",
+        "https://localhost:*",
+        "https://127.0.0.1",
+        "https://127.0.0.1:*"
+      ]
+    }
+  ],
+  "supportsHighlight": true,
+  "supportsLandingPage": true,
+  "supportsEmptyDataView": true,
+  "supportsKeyboardFocus": true,
+  "tooltips": {
+    "supportedTypes": {
+      "default": true,
+      "canvas": true
+    },
+    "roles": ["tooltips"]
+  },
+  "sorting": { "default": {} }
+}

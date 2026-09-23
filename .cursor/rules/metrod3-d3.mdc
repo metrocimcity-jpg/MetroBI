@@ -1,0 +1,13 @@
+---
+description: D3 zoomable sunburst conventions for MetroD3
+globs: MetroD3/src/**/*.{ts,less},MetroD3/capabilities.json,MetroD3/pbiviz.json,MetroD3/style/**/*.less
+alwaysApply: false
+---
+
+# MetroD3 D3 visual
+
+- Use D3 7 `hierarchy`, `partition`, and `arc` as in https://observablehq.com/@d3/zoomable-sunburst.
+- Keep one SVG; rebuild on data/format signature change; remove it in `destroy()`.
+- Category field wells build a `{ name, children, value }` tree. Landing page uses the flare sample.
+- Format pane must persist with no data: `supportsEmptyDataView`, `selector: null`, `forceNullSelectors`, `applyFormattingObjects`.
+- JSON URLs need `WebAccess` and CORS. Work in `MetroD3/`; run `pbiviz` from that folder.

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MetroKit</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+  <aside id="settings" class="settings">
+    <p class="hint">Home or Insert → <strong>MetroKit</strong> → <strong>Insert</strong> places the 3D view on the sheet. <strong>Settings</strong> opens this sidebar. Close the pane to hide it.</p>
+    <p id="status" class="hint"></p>
+    <p id="insertStatus" class="hint"></p>
+    <details open>
+      <summary>Model</summary>
+      <label>Model URL
+        <input id="modelUrl" type="url" placeholder="http://localhost/metrobi/1.xkt" />
+      </label>
+      <div class="row">
+        <button id="loadUrl" type="button">Load</button>
+        <button id="fromCell" type="button">From cell</button>
+      </div>
+      <label>Format
+        <select id="modelFormat">
+          <option value="auto">Auto from URL</option>
+          <option value="xkt">XKT</option>
+          <option value="gltf">glTF / GLB</option>
+          <option value="ifc">IFC</option>
+        </select>
+      </label>
+      <label class="toggle"><input id="edges" type="checkbox" /> Emphasis edges</label>
+      <label class="toggle"><input id="sao" type="checkbox" /> Ambient occlusion</label>
+      <label class="toggle"><input id="excludeSpaces" type="checkbox" /> Hide IfcSpace</label>
+    </details>
+    <details>
+      <summary>Camera</summary>
+      <label>Navigation
+        <select id="navMode">
+          <option value="orbit">Orbit</option>
+          <option value="firstPerson">First person</option>
+          <option value="planView">Plan view</option>
+        </select>
+      </label>
+      <label>Projection
+        <select id="projection">
+          <option value="perspective">Perspective</option>
+          <option value="ortho">Orthographic</option>
+        </select>
+      </label>
+      <label class="toggle"><input id="fitOnLoad" type="checkbox" /> Fit model on load</label>
+      <label class="toggle"><input id="doublePickFlyTo" type="checkbox" /> Double-click fly to object</label>
+      <label class="toggle"><input id="followPointer" type="checkbox" /> Orbit around pointer</label>
+      <label class="toggle"><input id="pivot" type="checkbox" /> Show pivot</label>
+    </details>
+    <details>
+      <summary>3D cube</summary>
+      <label class="toggle"><input id="cubeShow" type="checkbox" /> Show 3D cube</label>
+      <label>Size (px)
+        <input id="cubeSize" type="number" min="80" max="320" step="10" />
+      </label>
+      <label>Position
+        <select id="cubeAlign">
+          <option value="bottomRight">Bottom right</option>
+          <option value="bottomLeft">Bottom left</option>
+          <option value="topRight">Top right</option>
+          <option value="topLeft">Top left</option>
+        </select>
+      </label>
+      <label class="toggle"><input id="cubeFly" type="checkbox" /> Fly to face</label>
+    </details>
+    <details>
+      <summary>Appearance</summary>
+      <label>Background <input id="background" type="color" /></label>
+      <label>Highlight <input id="highlight" type="color" /></label>
+      <label class="toggle"><input id="xrayOthers" type="checkbox" /> X-ray unselected</label>
+    </details>
+    <details>
+      <summary>Selection</summary>
+      <label class="toggle"><input id="writeToSheet" type="checkbox" /> Write pick to sheet</label>
+      <button id="highlightSheet" type="button">Highlight IDs from selection</button>
+    </details>
+  </aside>
+</body>
+</html>

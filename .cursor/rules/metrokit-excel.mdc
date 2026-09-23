@@ -1,0 +1,16 @@
+---
+description: MetroKit Excel add-in conventions
+globs: MetroKit-Excel/src/**/*.{ts,css,html},MetroKit-Excel/manifest.xml,MetroKit-Excel/webpack.config.js
+alwaysApply: false
+---
+
+# MetroKit Excel add-in
+
+- Use `@xeokit/xeokit-sdk` `Viewer`, `XKTLoaderPlugin`, `GLTFLoaderPlugin`, `WebIFCLoaderPlugin`, `NavCubePlugin`.
+- Keep one Viewer; resize the canvas on window resize; `viewer.destroy()` only on teardown.
+- Prefer XKT for large IFC. Parse IFC in-browser only for small files.
+- NavCube needs its own canvas (`canvasElement`), not the main viewer canvas.
+- The viewer is a content add-in on the sheet (`manifest-content.xml`). Settings are a task pane (`manifest.xml`) that can be shown or hidden.
+- Persist settings with `publishSettings` (hidden sheet `MetroKitConfig` and `localStorage`). URL only — no file picker.
+- Fetch models as `ArrayBuffer` (CORS). Webpack fallbacks: `fs` and `path` false.
+- Excel I/O is optional: guard with `isExcelHost()`. Work in `MetroKit-Excel/`.

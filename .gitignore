@@ -14,3 +14,7 @@ MetroKit/node_modules/
 MetroKit/.tmp/
 MetroKit/dist/
 MetroKit/webpack.statistics.prod.html
+MetroD3/node_modules/
+MetroD3/.tmp/
+MetroD3/dist/
+MetroD3/webpack.statistics.prod.html

@@ -1,0 +1,26 @@
+{
+  "visual": {
+    "name": "zoomableSunburst",
+    "displayName": "Zoomable Sunburst",
+    "guid": "zoomableSunburstMetroD3F4A8C2E1",
+    "visualClassName": "Visual",
+    "version": "1.0.0.0",
+    "description": "D3 zoomable sunburst for Power BI. Click a ring to zoom in, click the center to zoom out. Hierarchy from Category fields or a JSON URL.",
+    "supportUrl": "https://observablehq.com/@d3/zoomable-sunburst",
+    "gitHubUrl": "https://github.com/d3/d3"
+  },
+  "apiVersion": "5.11.1",
+  "author": {
+    "name": "MetroBI",
+    "email": "metrobi@local"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": null,
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": [],
+  "version": "1.0.0.0"
+}

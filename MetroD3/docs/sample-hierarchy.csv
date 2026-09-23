@@ -1,0 +1,16 @@
+level1,level2,level3,value
+analytics,cluster,AgglomerativeCluster,3938
+analytics,cluster,CommunityStructure,3812
+analytics,cluster,HierarchicalCluster,6714
+analytics,graph,BetweennessCentrality,3534
+analytics,graph,LinkDistance,5731
+analytics,optimization,AspectRatioBanker,7074
+animate,interpolate,ColorInterpolator,2047
+animate,interpolate,NumberInterpolator,1382
+animate,,Easing,17010
+data,converters,JSONConverter,2220
+data,,DataField,1759
+display,,TextSprite,10066
+vis,legend,Legend,20859
+vis,layout,ForceDirectedLayout,8411
+vis,layout,TreeMapLayout,9191
