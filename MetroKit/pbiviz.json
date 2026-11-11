@@ -4,7 +4,7 @@
     "displayName": "Xeokit Model Viewer",
     "guid": "xeokitModelViewerMetroKitB7E4D1A8C3",
     "visualClassName": "Visual",
-    "version": "1.0.9.0",
+    "version": "1.0.10.0",
     "description": "xeokit 3D BIM/CAD viewer for Power BI. Loads XKT, glTF/GLB and IFC, with orbit/pan/zoom, object picking, and a 3D NavCube.",
     "supportUrl": "https://xeokit.io",
     "gitHubUrl": "https://github.com/xeokit/xeokit-sdk"

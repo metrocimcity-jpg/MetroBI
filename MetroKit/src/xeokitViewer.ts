@@ -7,6 +7,7 @@ import {
     NavCubePlugin,
     WebIFCLoaderPlugin
 } from "@xeokit/xeokit-sdk";
+import * as WebIFC from "web-ifc";
 import powerbi from "powerbi-visuals-api";
 import { VisualFormattingSettingsModel } from "./settings";
 import { MappedModelData } from "./dataView";
@@ -291,12 +292,11 @@ export class XeokitViewerController {
         if (!this.viewer) {
             throw new Error("Viewer is not ready");
         }
-        const webIfc = await loadWebIfcFromCdn();
-        const IfcAPI = new webIfc.IfcAPI();
-        IfcAPI.SetWasmPath("https://cdn.jsdelivr.net/npm/web-ifc@0.0.51/");
+        const IfcAPI = new WebIFC.IfcAPI();
+        IfcAPI.SetWasmPath("https://localhost:8091/web-ifc/", true);
         await IfcAPI.Init();
-        const loader = new WebIFCLoaderPlugin(this.viewer, { WebIFC: webIfc, IfcAPI });
-        return loader.load({ ...loadCfg, loadMetadata: true });
+        const loader = new WebIFCLoaderPlugin(this.viewer, { WebIFC, IfcAPI });
+        return loader.load({ ...loadCfg, ifc: ifcBufferForLoader(loadCfg.ifc), loadMetadata: true });
     }
 
     private highlightFromData(settings: VisualFormattingSettingsModel, data: MappedModelData): void {
@@ -360,6 +360,19 @@ export class XeokitViewerController {
     }
 }
 
+function ifcBufferForLoader(buffer: ArrayBuffer | undefined): ArrayBuffer | undefined {
+    if (!buffer) {
+        return buffer;
+    }
+    const text = new TextDecoder().decode(buffer);
+    const from = "FILE_SCHEMA(('IFC4X3_ADD2'))";
+    if (!text.includes(from)) {
+        return buffer;
+    }
+    const bytes = new TextEncoder().encode(text.replace(from, "FILE_SCHEMA(('IFC4X3'))"));
+    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+}
+
 async function fetchModelBuffer(url: string): Promise<ArrayBuffer> {
     let response: Response;
     try {
@@ -399,20 +412,3 @@ function waitForModel(model: SceneModel | undefined): Promise<void> {
     });
 }
 
-async function loadWebIfcFromCdn(): Promise<{ IfcAPI: new () => { SetWasmPath: (path: string) => void; Init: () => Promise<void> } }> {
-    const global = window as unknown as { WebIFC?: { IfcAPI: new () => { SetWasmPath: (path: string) => void; Init: () => Promise<void> } } };
-    if (global.WebIFC) {
-        return global.WebIFC;
-    }
-    await new Promise<void>((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/npm/web-ifc@0.0.51/web-ifc-api-iife.js";
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Could not load web-ifc. Convert IFC to XKT for Power BI."));
-        document.head.appendChild(script);
-    });
-    if (!global.WebIFC) {
-        throw new Error("web-ifc did not initialize. Convert IFC to XKT, or allow jsdelivr in WebAccess.");
-    }
-    return global.WebIFC;
-}

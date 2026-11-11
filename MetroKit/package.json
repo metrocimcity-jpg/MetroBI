@@ -1,19 +1,21 @@
 {
   "name": "xeokit-model-viewer",
   "description": "Power BI custom visual: xeokit 3D model viewer for XKT, glTF and IFC with NavCube navigation",
-  "version": "1.0.9.0",
+  "version": "1.0.10.0",
   "license": "AGPL-3.0",
-    "scripts": {
+  "scripts": {
     "pbiviz": "pbiviz",
     "postinstall": "node scripts/patch-pbiviz-webpack.cjs",
     "start": "node scripts/patch-pbiviz-webpack.cjs && pbiviz start",
     "package": "node scripts/patch-pbiviz-webpack.cjs && pbiviz package",
+    "preview:https": "node scripts/serve-preview-https.cjs",
     "lint": "npx eslint ."
   },
   "dependencies": {
     "@xeokit/xeokit-sdk": "2.6.114",
     "powerbi-visuals-api": "5.11.1",
-    "powerbi-visuals-utils-formattingmodel": "6.0.4"
+    "powerbi-visuals-utils-formattingmodel": "6.0.4",
+    "web-ifc": "^0.0.51"
   },
   "devDependencies": {
     "powerbi-visuals-tools": "6.2.0",
