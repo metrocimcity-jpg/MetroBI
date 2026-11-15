@@ -2,21 +2,36 @@
 
 const fs = require("fs");
 const path = require("path");
+const readline = require("readline");
 
 const ifcPath = process.argv[2] || path.join(__dirname, "..", "preview", "1.ifc");
 const csvPath = process.argv[3] || path.join(__dirname, "..", "preview", "1-elements.csv");
 
-const ELEMENT_TYPES = new Set([
-    "IFCBUILDINGELEMENTPROXY",
-    "IFCCABLECARRIERSEGMENT",
-    "IFCCABLECARRIERFITTING"
+const NON_ELEMENT = new Set([
+    "IFCPROJECT",
+    "IFCSITE",
+    "IFCBUILDING",
+    "IFCBUILDINGSTOREY",
+    "IFCSPACE",
+    "IFCSPATIALZONE",
+    "IFCDISTRIBUTIONPORT",
+    "IFCOPENINGELEMENT",
+    "IFCDISTRIBUTIONSYSTEM",
+    "IFCGROUP",
+    "IFCSYSTEM",
+    "IFCZONE"
 ]);
 
-const TYPE_LABEL = {
-    IFCBUILDINGELEMENTPROXY: "IfcBuildingElementProxy",
-    IFCCABLECARRIERSEGMENT: "IfcCableCarrierSegment",
-    IFCCABLECARRIERFITTING: "IfcCableCarrierFitting"
-};
+const SKIP_GEOMETRY = /POINT|DIRECTION|AXIS2|PLACEMENT|PROFILEDEF|EXTRUDED|REPRESENTATION|COLOUR|STYLE|MAPPEDITEM|CURVE|FACE|POLYLOOP|VERTEX|EDGE|SHELL|PLANE|SURFACE|TRANSFORMATION|CIRCLE|VECTOR|GEOMETRIC|PRESENTATION|FILL|TRIMMED|COMPOSITE|BOOLEAN|HALFSPACE|TESSELLAT|TRIANGULAT|INDEXEDPOLY|CARTESIAN|SIUNIT|CONVERSIONBASED|DIMENSIONAL|MEASUREWITHUNIT|UNITASSIGNMENT|OWNERHISTORY|PERSON|ORGANIZATION|APPLICATION|POSTALADDRESS|CLASSIFICATION|MAPCONVERSION|PROJECTEDCRS|CONTEXT|ANNOTATION|CONNECTIONGEOMETRY|FEATUREELEMENT/;
+
+const TYPE_WORDS = [
+    "BuildingElementProxy", "DistributionChamberElement", "ElectricDistributionBoard",
+    "FireSuppressionTerminal", "AirTerminalBox", "UnitaryEquipment", "SanitaryTerminal",
+    "WasteTerminal", "SpaceHeater", "CableCarrierSegment", "CableCarrierFitting",
+    "PipeSegment", "PipeFitting", "DuctSegment", "DuctFitting", "AirTerminal",
+    "FlowTerminal", "BuiltElement", "BuildingElement", "Covering", "Damper", "Valve",
+    "Slab", "Tank", "Alarm", "Fan"
+].sort((a, b) => b.length - a.length);
 
 function splitTop(body) {
     const parts = [];
@@ -198,10 +213,135 @@ function propertyValue(nominal) {
     if (nominal === "F") {
         return false;
     }
+    if (Array.isArray(nominal)) {
+        return nominal.filter((item) => item != null && item !== "").join("; ");
+    }
     return nominal;
 }
 
-const entities = parseEntities(fs.readFileSync(ifcPath, "utf8"));
+function keepEntity(name) {
+    if (name.startsWith("IFCREL") || name.startsWith("IFCPROPERTY") || name.startsWith("IFCMATERIAL") || name.startsWith("IFCQUANTITY")) {
+        return true;
+    }
+    if (name === "IFCBUILDINGSTOREY" || name === "IFCBUILDING" || name === "IFCSITE") {
+        return true;
+    }
+    if (name.endsWith("TYPE") || SKIP_GEOMETRY.test(name)) {
+        return false;
+    }
+    return true;
+}
+
+function statementClosed(statement) {
+    let depth = 0;
+    let inStr = false;
+    for (let i = 0; i < statement.length; i++) {
+        const c = statement[i];
+        if (inStr) {
+            if (c === "'" && statement[i + 1] === "'") {
+                i++;
+                continue;
+            }
+            if (c === "'") {
+                inStr = false;
+            }
+            continue;
+        }
+        if (c === "'") {
+            inStr = true;
+            continue;
+        }
+        if (c === "(") {
+            depth++;
+        } else if (c === ")") {
+            depth--;
+        }
+    }
+    return depth === 0 && statement.endsWith(";");
+}
+
+function loadEntities(filePath) {
+    return new Promise((resolve, reject) => {
+        const entities = new Map();
+        const input = readline.createInterface({
+            input: fs.createReadStream(filePath),
+            crlfDelay: Infinity
+        });
+        let buffer = "";
+        input.on("line", (line) => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed === "DATA;" || trimmed === "ENDSEC;" || trimmed === "END-ISO-10303-21;") {
+                return;
+            }
+            if (!buffer && !trimmed.startsWith("#")) {
+                return;
+            }
+            buffer = buffer ? buffer + trimmed : trimmed;
+            if (!statementClosed(buffer)) {
+                return;
+            }
+            const head = buffer.match(/^#(\d+)=([A-Z0-9_]+)\(/);
+            if (head && keepEntity(head[2])) {
+                const parsed = parseEntities(`DATA;\n${buffer}\nENDSEC;`);
+                const record = parsed.get(Number(head[1]));
+                if (record) {
+                    entities.set(Number(head[1]), record);
+                }
+            }
+            buffer = "";
+        });
+        input.on("close", () => resolve(entities));
+        input.on("error", reject);
+    });
+}
+
+function readProperty(prop) {
+    if (!prop || typeof prop.args[0] !== "string") {
+        return null;
+    }
+    if (prop.name === "IFCPROPERTYSINGLEVALUE") {
+        return [prop.args[0], propertyValue(prop.args[2])];
+    }
+    if (prop.name === "IFCPROPERTYBOUNDEDVALUE") {
+        const upper = propertyValue(prop.args[2]);
+        const lower = propertyValue(prop.args[3]);
+        const setPoint = propertyValue(prop.args[5]);
+        const value = upper != null ? upper : lower != null ? lower : setPoint;
+        return [prop.args[0], value];
+    }
+    if (prop.name === "IFCPROPERTYENUMERATEDVALUE") {
+        return [prop.args[0], propertyValue(prop.args[2])];
+    }
+    return null;
+}
+
+function typeLabel(name) {
+    let rest = name.startsWith("IFC") ? name.slice(3) : name;
+    const parts = ["Ifc"];
+    while (rest) {
+        const word = TYPE_WORDS.find((item) => rest.toUpperCase().startsWith(item.toUpperCase()));
+        if (!word) {
+            parts.push(rest.charAt(0) + rest.slice(1).toLowerCase());
+            break;
+        }
+        parts.push(word);
+        rest = rest.slice(word.length);
+    }
+    return parts.join("");
+}
+
+function isExportedElement(entity) {
+    if (!entity || entity.name.endsWith("TYPE") || NON_ELEMENT.has(entity.name)) {
+        return false;
+    }
+    if (entity.name.startsWith("IFCREL") || entity.name.startsWith("IFCPROPERTY") || entity.name.startsWith("IFCMATERIAL") || entity.name.startsWith("IFCQUANTITY")) {
+        return false;
+    }
+    return typeof entity.args[0] === "string" && entity.args[0].length >= 20 && entity.args.length >= 8;
+}
+
+async function main() {
+const entities = await loadEntities(ifcPath);
 const psets = new Map();
 const propsOn = new Map();
 const typeOf = new Map();
@@ -213,11 +353,11 @@ for (const [id, entity] of entities) {
         const propIds = refList(entity.args[4]);
         const props = {};
         for (const propId of propIds) {
-            const prop = entities.get(propId);
-            if (!prop || prop.name !== "IFCPROPERTYSINGLEVALUE") {
+            const read = readProperty(entities.get(propId));
+            if (!read || read[1] == null || read[1] === "") {
                 continue;
             }
-            props[prop.args[0]] = propertyValue(prop.args[2]);
+            props[read[0]] = read[1];
         }
         psets.set(id, { name: entity.args[2] || `Pset_${id}`, props });
     }
@@ -300,7 +440,7 @@ for (const [objectId, typeId] of typeOf) {
 const rows = [];
 const columns = new Set();
 for (const [id, entity] of entities) {
-    if (!ELEMENT_TYPES.has(entity.name)) {
+    if (!isExportedElement(entity)) {
         continue;
     }
     const props = propsOn.get(id) || {};
@@ -309,7 +449,7 @@ for (const [id, entity] of entities) {
         id,
         globalId: entity.args[0] || "",
         name: entity.args[2] || "",
-        type: TYPE_LABEL[entity.name] || entity.name,
+        type: typeLabel(entity.name),
         objectType: entity.args[4] || "",
         tag: entity.args[7] || "",
         predefinedType: entity.args[8] || "",
@@ -349,5 +489,10 @@ for (const row of rows) {
 }
 
 fs.writeFileSync(csvPath, `\uFEFF${lines.join("\r\n")}\r\n`, "utf8");
-console.log(`Wrote ${rows.length} elements to ${csvPath}`);
-console.log(`Columns: ${header.join(" | ")}`);
+console.log(`Wrote ${rows.length} elements, ${propColumns.length} parameters, to ${csvPath}`);
+}
+
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
