@@ -10,7 +10,7 @@ import {
 import * as WebIFC from "web-ifc";
 import powerbi from "powerbi-visuals-api";
 import { VisualFormattingSettingsModel } from "./settings";
-import { MappedModelData } from "./dataView";
+import { MappedModelData, resolveChartHighlight } from "./dataView";
 import { detectFormat, hexToRgb, sanitizeModelUrl } from "./format";
 
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
@@ -46,7 +46,8 @@ export class XeokitViewerController {
     private loadedSignature = "";
     private loadToken = 0;
     private settings: VisualFormattingSettingsModel | undefined;
-    private data: MappedModelData = { rows: [], modelUrl: "", objectIds: [] };
+    private data: MappedModelData = { rows: [], modelUrl: "", objectIds: [], highlightedObjectIds: null };
+    private populationIds = new Set<string>();
 
     constructor(
         private readonly hostElement: HTMLElement,
@@ -309,7 +310,9 @@ export class XeokitViewerController {
         if (!data.objectIds.length) {
             return;
         }
-        const ids = data.objectIds.filter((id) => scene.objects[id]);
+        const resolved = resolveChartHighlight(this.populationIds, data.objectIds, data.highlightedObjectIds);
+        this.populationIds = resolved.population;
+        const ids = resolved.ids.filter((id) => scene.objects[id]);
         if (!ids.length) {
             return;
         }

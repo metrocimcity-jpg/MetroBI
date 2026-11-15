@@ -1,1 +1,1 @@
-export const METROKIT_VERSION = "1.0.10.0";
+export const METROKIT_VERSION = "1.0.11.0";

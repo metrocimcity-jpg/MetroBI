@@ -18,6 +18,8 @@ export interface MappedModelData {
     rows: ModelRow[];
     modelUrl: string;
     objectIds: string[];
+    /** Object ids marked by a chart highlight. Null when the host did not send a highlight array. */
+    highlightedObjectIds: string[] | null;
 }
 
 function asText(value: PrimitiveValue): string {
@@ -43,7 +45,7 @@ export function mapDataView(
     dataView: DataView | undefined,
     host: powerbi.extensibility.visual.IVisualHost
 ): MappedModelData {
-    const empty: MappedModelData = { rows: [], modelUrl: "", objectIds: [] };
+    const empty: MappedModelData = { rows: [], modelUrl: "", objectIds: [], highlightedObjectIds: null };
     const categorical = dataView?.categorical;
     if (!categorical) {
         return empty;
@@ -67,7 +69,10 @@ export function mapDataView(
 
     const rows: ModelRow[] = [];
     const objectIds: string[] = [];
+    const highlightedObjectIds: string[] = [];
     let modelUrl = "";
+    const highlightColumn = findHighlightColumn(categories, values);
+    const highlightArray = highlightColumn?.highlights;
 
     for (let i = 0; i < rowCount; i++) {
         const idColumn = idIdx >= 0 ? categories[idIdx] : categories[0];
@@ -81,6 +86,9 @@ export function mapDataView(
         }
         if (objectId) {
             objectIds.push(objectId);
+            if (highlightArray && highlightArray[i] != null) {
+                highlightedObjectIds.push(objectId);
+            }
         }
         rows.push({
             objectId,
@@ -95,5 +103,45 @@ export function mapDataView(
         });
     }
 
-    return { rows, modelUrl, objectIds };
+    return {
+        rows,
+        modelUrl,
+        objectIds,
+        highlightedObjectIds: highlightArray ? highlightedObjectIds : null
+    };
+}
+
+function findHighlightColumn(
+    categories: powerbi.DataViewCategoryColumn[] | undefined,
+    values: powerbi.DataViewValueColumns | undefined
+): { highlights?: PrimitiveValue[] } | undefined {
+    const columns = [...(values || []), ...(categories || [])] as Array<{ highlights?: PrimitiveValue[] }>;
+    return columns.find((column) => Array.isArray(column.highlights));
+}
+
+/**
+ * Chart clicks filter this visual down to the selected rows.
+ * The full row set means nothing is selected, so the model stays unhighlighted.
+ * A smaller set is the current chart selection.
+ */
+export function resolveChartHighlight(
+    population: Set<string>,
+    objectIds: string[],
+    explicit: string[] | null
+): { population: Set<string>; ids: string[] } {
+    if (explicit) {
+        return { population, ids: explicit };
+    }
+    if (!objectIds.length) {
+        return { population, ids: [] };
+    }
+    const incoming = new Set(objectIds);
+    const hasNewId = [...incoming].some((id) => !population.has(id));
+    if (population.size === 0 || hasNewId || incoming.size > population.size) {
+        return { population: incoming, ids: [] };
+    }
+    if (incoming.size === population.size) {
+        return { population, ids: [] };
+    }
+    return { population, ids: objectIds };
 }
