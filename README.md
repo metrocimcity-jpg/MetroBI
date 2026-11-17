@@ -16,22 +16,28 @@ Cursor prompts (attach in chat when extending a visual):
 - MetroD3: [MetroD3/.cursor/prompts](MetroD3/.cursor/prompts)
 - MetroKit-Excel: [MetroKit-Excel/.cursor/prompts](MetroKit-Excel/.cursor/prompts)
 
-Format pane URLs and on/off settings persist with **no fields bound**. Text boxes commit on Enter. `http://localhost` needs an explicit `WebAccess` entry (not covered by `http://*`). MetroKit-Excel persists the same settings in `localStorage`.
+Format pane URLs and on/off settings persist with **no fields bound**. Text boxes commit on Enter. `http://localhost` needs an explicit `WebAccess` entry (`http://*` does not cover localhost). MetroKit-Excel stores the same settings on the hidden `MetroKitConfig` sheet and in `localStorage`.
 
 ```powershell
 cd MetroMap
 npm install
-npx pbiviz package
+npm run package
 
 cd ..\MetroKit
 npm install
-npx pbiviz package
+npm run package
 
 cd ..\MetroD3
 npm install
-npx pbiviz package
+npm run package
 
 cd ..\MetroKit-Excel
 npm install
 npm run build
 ```
+
+## Release
+
+Pushing a `v*` tag runs [`.github/workflows/release.yml`](.github/workflows/release.yml). The workflow packages MetroMap, MetroKit, and MetroD3, builds MetroKit-Excel, and publishes one GitHub release with all four files.
+
+Current release: [v1.0.0](https://github.com/metrocimcity-jpg/MetroBI/releases/tag/v1.0.0) — MetroMap 1.0.1.0, MetroKit 1.0.11.0, MetroD3 1.0.0.0, MetroKit-Excel 1.1.0.

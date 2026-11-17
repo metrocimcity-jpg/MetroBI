@@ -10,7 +10,7 @@ alwaysApply: false
 - Keep one Viewer; resize the canvas on window resize; `viewer.destroy()` only on teardown.
 - Prefer XKT for large IFC. Parse IFC in-browser only for small files.
 - NavCube needs its own canvas (`canvasElement`), not the main viewer canvas.
-- The viewer is a content add-in on the sheet (`manifest-content.xml`). Settings are a task pane (`manifest.xml`) that can be shown or hidden.
+- The viewer is a content add-in on the sheet (`manifest-content.xml`, version 1.0.0.0). Settings are a task pane (`manifest.xml`). Home or Insert → MetroKit → Settings opens it; close the pane to hide it. Ribbon stays on VersionOverrides V1_0. Insert is `src/commands.ts`. Poll insert status; do not use `addHandlerAsync` for `SettingsChanged`.
 - Persist settings with `publishSettings` (hidden sheet `MetroKitConfig` and `localStorage`). URL only — no file picker.
 - Fetch models as `ArrayBuffer` (CORS). Webpack fallbacks: `fs` and `path` false.
 - Excel I/O is optional: guard with `isExcelHost()`. Work in `MetroKit-Excel/`.

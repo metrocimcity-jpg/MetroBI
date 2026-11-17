@@ -24,6 +24,8 @@ Landing page with **no fields** must still save URL and toggles:
 - slice `selector: null`; `forceNullSelectors` in `getFormattingModel`
 - apply `metadata.objects` via `applyFormattingObjects` (do not trust `populateFormattingSettingsModel` alone)
 - `renderingFinished` immediately; fetch XKT as `ArrayBuffer` for CORS
+- IFC WASM is `web-ifc` 0.0.51 from this package, served at `https://localhost:8091/web-ifc/` by `npm run preview:https`
+- Chart highlight uses `resolveChartHighlight`; leave `supportsHighlight` false
 - `WebAccess` must list localhost explicitly
 - no file picker in the Format pane
 

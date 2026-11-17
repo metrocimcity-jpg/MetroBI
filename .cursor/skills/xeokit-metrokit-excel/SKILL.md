@@ -14,7 +14,8 @@ The add-in lives in `MetroKit-Excel/`. Read [MetroKit-Excel/README.md](../../../
 Office allows one manifest type per add-in, so this project sideloads two manifests that share one site:
 
 - On-sheet viewer: `src/content.ts` + `manifest-content.xml` (content add-in)
-- Settings sidebar: `src/taskpane.ts` + `manifest.xml` (Home or Insert → MetroKit → Settings). Insert copies a viewer onto the sheet.
+- Settings sidebar: `src/taskpane.ts` + `manifest.xml` (Home or Insert → MetroKit → Settings opens the pane; close it to hide). Ribbon is VersionOverrides V1_0 only.
+- Insert: `src/commands.ts` copies a viewer onto the sheet. Poll `metrokitInsertStatus`; do not use `addHandlerAsync` for `SettingsChanged`. Keep the content manifest at 1.0.0.0.
 - Shared settings: `src/bridge.ts` (hidden sheet `MetroKitConfig`)
 - Viewer + plugins: `src/viewer.ts`
 - Sheet I/O: `src/excel.ts`

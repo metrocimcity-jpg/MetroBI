@@ -7,3 +7,4 @@ Object picking lives in `MetroKit/src/xeokitViewer.ts` and `MetroKit/src/dataVie
 - Cross-filter only when Format → Selection → Cross-filter is on **and** the picked id exists in the Object ID field well (`selectionManager.select`). With no data bound, pick still highlights in the viewer.
 - Respect `hostCapabilities.allowInteractions`.
 - Object ID / Label / Color by / Tooltips are optional field wells. The visual must render the model from Format → Model URL without them.
+- Chart selection: `mapDataView` records `highlightedObjectIds` when a column has a `highlights` array. `resolveChartHighlight` treats a smaller Object ID set than the known population as the selection, and the full set as no selection. `highlightFromData` highlights those ids and, when **X-ray unselected** is on, x-rays the rest. Leave `supportsHighlight` false. Ids must match `scene.objects` (the element CSV **Object ID** column is the IFC GlobalId).

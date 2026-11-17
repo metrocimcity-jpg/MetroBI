@@ -14,3 +14,4 @@ Requirements:
 - Time out hung parses; show errors on the canvas status element.
 - Keep one `Viewer`. Resize the canvas on window resize. `viewer.destroy()` only on teardown.
 - Webpack must set `resolve.fallback.fs` and `path` to `false`.
+- Excel IFC loads web-ifc **0.0.51 from jsDelivr** and sets the WASM path to that package URL. Leave the Power BI visual’s `https://localhost:8091/web-ifc/` path in MetroKit.

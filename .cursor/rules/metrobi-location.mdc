@@ -8,6 +8,6 @@ alwaysApply: true
 - **MetroMap/** — Leaflet map visual (WMS, GeoJSON, shapefile)
 - **MetroKit/** — xeokit 3D model viewer (XKT, glTF, IFC, NavCube)
 - **MetroD3/** — D3 zoomable sunburst (Observable @d3/zoomable-sunburst)
-- **MetroKit-Excel/** — Excel add-in: xeokit viewer embedded on the sheet, settings in a show/hide task pane
+- **MetroKit-Excel/** — Excel add-in: xeokit viewer embedded on the sheet; Home or Insert → MetroKit → Settings opens the sidebar
 
 Run `pbiviz` from the visual's own folder. Remote URLs need `WebAccess`. Run MetroKit-Excel from `MetroKit-Excel/` (`npm start` / `npm run preview`).

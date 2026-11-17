@@ -2,7 +2,9 @@
 
 Use the MetroKit xeokit skill and [00-format-pane.md](00-format-pane.md).
 
-Loaders live in `MetroKit/src/xeokitViewer.ts`. Prefer **XKT** (`XKTLoaderPlugin`) for large IFC. Convert with [convert2xkt](https://xeokit.github.io/xeokit-convert). Parse IFC in-browser (`WebIFCLoaderPlugin` + web-ifc WASM) only for small files. glTF/GLB uses `GLTFLoaderPlugin`.
+Loaders live in `MetroKit/src/xeokitViewer.ts`. Prefer **XKT** (`XKTLoaderPlugin`) for large IFC. Convert with [convert2xkt](https://xeokit.github.io/xeokit-convert). Parse IFC in-browser only for small files that web-ifc 0.0.51 accepts (it rejects IFC4X3_ADD2). glTF/GLB uses `GLTFLoaderPlugin`.
+
+IFC in the visual imports `web-ifc` from this package. `SetWasmPath` is `https://localhost:8091/web-ifc/` (absolute, second argument `true`). Serve `preview/web-ifc/` with `npm run preview:https` (pbiviz certificate, CORS). Keep the visual off the jsDelivr WASM URL. The standalone `preview/index.html` page may still use the CDN.
 
 Requirements:
 

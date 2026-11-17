@@ -2,12 +2,14 @@
 
 Excel add-in built on [xeokit SDK](https://xeokit.io). Same viewer as [MetroKit](../MetroKit/README.md): **XKT**, **glTF/GLB**, and **IFC**, with orbit/pan/zoom, object pick, and a **3D NavCube**.
 
-The 3D view is embedded on the worksheet (resize it like a chart). Settings live in the Excel sidebar, which you can show or hide.
+The 3D view is embedded on the worksheet (resize it like a chart). Settings live in the Excel sidebar. Close the pane to hide them.
 
 ## Use in Excel
 
-1. **Insert → My Add-ins → MetroKit** — places the viewer on the sheet.
-2. **Home → MetroKit → Settings** — opens the sidebar. Click it again, or close the pane, to hide it.
+1. **Home** or **Insert → MetroKit → Insert** — places the viewer on the sheet.
+2. **Home** or **Insert → MetroKit → Settings** — opens the sidebar. Close the pane to hide it.
+
+This Excel build ignores ribbon `VersionOverrides` 1.1, so Settings is a ShowTaskpane button. The viewer is inserted by copying an existing MetroKit shape, or by inserting the bundled `MetroKit` sheet and copying that shape onto the active sheet.
 
 ## Features
 
@@ -52,7 +54,9 @@ npx office-addin-dev-settings register manifest.xml
 npm start
 ```
 
-Trust the localhost certificate if Excel or the browser prompts. Insert the viewer from **Insert → My Add-ins → MetroKit**. Open settings from **Home → MetroKit → Settings**.
+Trust the localhost certificate if Excel or the browser prompts. Close Excel before registering a content add-in, then start Excel again. Use **Home** or **Insert → MetroKit → Insert** for the viewer and **Settings** for the sidebar.
+
+`manifest-content.xml` stays at version **1.0.0.0** so it matches the web extension inside `assets/metrokit-viewer.xlsx`. The task pane manifest can move independently. After changing `src/commands.ts`, bump the `commands.html?v=` query in `manifest.xml` so Excel loads the new function file.
 
 Validate the manifest:
 
@@ -84,7 +88,8 @@ Project skill: `.cursor/skills/xeokit-metrokit-excel/`. Rule: `.cursor/rules/met
 
 ```
 src/content.ts         On-sheet viewer (content add-in)
-src/taskpane.ts        Settings sidebar; Home → Settings shows or hides it
+src/taskpane.ts        Settings sidebar. Polls insert status; no SettingsChanged handler
+src/commands.ts        Ribbon Insert: copy the viewer onto the active sheet
 src/bridge.ts          Shared settings in a hidden workbook sheet
 src/settings.ts        Defaults and localStorage
 src/viewer.ts          Viewer, ArrayBuffer loaders, NavCube, picking
