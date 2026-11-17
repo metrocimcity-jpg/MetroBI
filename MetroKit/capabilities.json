@@ -158,7 +158,7 @@
       ]
     }
   ],
-  "supportsHighlight": true,
+  "supportsHighlight": false,
   "supportsLandingPage": true,
   "supportsEmptyDataView": true,
   "supportsKeyboardFocus": true,

@@ -1,0 +1,117 @@
+﻿Parameter,Filled elements,Total elements,Filled percent
+Pset_EnvironmentalImpactIndicators.Reference,4211,4211,100
+GTAA_PACT.Height (m),2298,4211,54.6
+GTAA_COBie.COBie.Component.TypeName,2293,4211,54.5
+GTAA_COBie.COBie.Zone.Category,2293,4211,54.5
+GTAA_COBie.COBie.Zone.Name,2293,4211,54.5
+GTAA_IFC.IfcEntity,2293,4211,54.5
+GTAA_IFC.ObjectType,2293,4211,54.5
+GTAA_IFC.PredefinedType,2293,4211,54.5
+GTAA_PACT.Area (m2),2293,4211,54.5
+GTAA_PACT.Area 3D (m2),2293,4211,54.5
+GTAA_PACT.Asset ID,2293,4211,54.5
+GTAA_PACT.Base Level (m),2293,4211,54.5
+GTAA_PACT.DesignStatus,2293,4211,54.5
+GTAA_PACT.Diameter (mm),2293,4211,54.5
+GTAA_PACT.Discipline,2293,4211,54.5
+GTAA_PACT.Elevation (m),2293,4211,54.5
+GTAA_PACT.Length (m),2297,4211,54.5
+GTAA_PACT.Level,2293,4211,54.5
+GTAA_PACT.Location,2293,4211,54.5
+GTAA_PACT.Mark,2293,4211,54.5
+GTAA_PACT.Material,2293,4211,54.5
+GTAA_PACT.Outer Diameter (mm),2293,4211,54.5
+GTAA_PACT.PACT_ID,2293,4211,54.5
+GTAA_PACT.Project ID,2293,4211,54.5
+GTAA_PACT.Width (m),2296,4211,54.5
+GTAA_COBie.Maximo.Location,2292,4211,54.4
+GTAA_COBie.Maximo.Registrable,2292,4211,54.4
+GTAA_PACT.Slope (%),2292,4211,54.4
+GTAA_PACT.Thickness (mm),2292,4211,54.4
+GTAA_PACT.Top Level (m),2292,4211,54.4
+GTAA_PACT.Type,2292,4211,54.4
+GTAA_PACT.UoM,2292,4211,54.4
+GTAA_PACT.Volume (m3),2292,4211,54.4
+GTAA_PACT.X Coord,2292,4211,54.4
+GTAA_PACT.Y Coord,2292,4211,54.4
+GTAA_COBie.Classification.MasterFormat,2287,4211,54.3
+GTAA_COBie.Classification.Uniformat,2287,4211,54.3
+GTAA_COBie.Maximo.Class,2286,4211,54.3
+GTAA_PACT.System Type,2286,4211,54.3
+GTAA_COBie.Classification.Omniclass.23.Description,2268,4211,53.9
+GTAA_COBie.Classification.Omniclass.23.Number,2268,4211,53.9
+GTAA_COBie.COBie.Component.AssetIdentifier,2266,4211,53.8
+GTAA_COBie.COBie.Component.BarCode,2266,4211,53.8
+GTAA_COBie.COBie.Component.Description,2266,4211,53.8
+GTAA_COBie.COBie.Component.InstallationDate,2266,4211,53.8
+GTAA_COBie.COBie.Component.Name,2266,4211,53.8
+GTAA_COBie.COBie.Component.SerialNumber,2266,4211,53.8
+GTAA_COBie.COBie.Component.TagNumber,2266,4211,53.8
+GTAA_COBie.COBie.Component.WarrantyStartDate,2266,4211,53.8
+GTAA_COBie.Classification.Omniclass.21.Description,2259,4211,53.6
+GTAA_COBie.Classification.Omniclass.21.Number,2259,4211,53.6
+GTAA_PACT.Dataset Code,2251,4211,53.5
+GTAA_PACT.Standard Name,2250,4211,53.4
+GTAA_COBie.Maximo.Subsystem,1308,4211,31.1
+GTAA_PACT.Pipe System,1259,4211,29.9
+Pset_PipeSegmentTypeCommon.Length,1116,4211,26.5
+Pset_PipeSegmentTypeCommon.Reference,1116,4211,26.5
+Pset_PipeSegmentOccurrence.InvertElevation,1100,4211,26.1
+GTAA_COBie.Maximo.SystemNum,1083,4211,25.7
+Pset_PipeFittingTypeCommon.Reference,1065,4211,25.3
+Pset_CoveringCommon.IsExternal,616,4211,14.6
+Pset_CoveringCommon.Reference,616,4211,14.6
+Pset_DuctFittingTypeCommon.Reference,613,4211,14.6
+GTAA_IFC.PropertySets,230,4211,5.5
+GTAA_COBie.COBie.Floor.Name,223,4211,5.3
+GTAA_COBie.COBie.Space.Name,223,4211,5.3
+GTAA_COBie.COBie.System.Category,223,4211,5.3
+GTAA_COBie.COBie.System.Description,223,4211,5.3
+GTAA_COBie.COBie.System.Name,221,4211,5.2
+Pset_BuildingElementProxyCommon.IsExternal,180,4211,4.3
+Pset_BuildingElementProxyCommon.Reference,180,4211,4.3
+Pset_AirTerminalBoxTypeCommon.Reference,138,4211,3.3
+Pset_DamperTypeCommon.Reference,127,4211,3
+Pset_ElementSize.NominalWidth,122,4211,2.9
+Pset_AirTerminalTypeCommon.Reference,116,4211,2.8
+Pset_ElementSize.NominalHeight,118,4211,2.8
+Pset_DamperTypeCommon.NumberofBlades,102,4211,2.4
+Pset_ValveTypeCommon.Reference,79,4211,1.9
+GTAA_COBie.Maximo.RoomArea,74,4211,1.8
+Pset_DuctSegmentTypeCommon.Reference,73,4211,1.7
+Pset_FireSuppressionTerminalTypeCommon.Reference,54,4211,1.3
+Pset_WasteTerminalTypeCommon.Reference,51,4211,1.2
+Pset_ElectricalDeviceCommon.Power,43,4211,1
+Pset_ManufacturerTypeInformation.Manufacturer,44,4211,1
+GTAA_PACT.Voltage (V),36,4211,0.9
+Pset_ConstructionOccurence.AssetIdentifier,28,4211,0.7
+Pset_ElementSize.NominalLength,29,4211,0.7
+Pset_ManufacturerOccurrence.BarCode,28,4211,0.7
+Pset_ManufacturerOccurrence.SerialNumber,28,4211,0.7
+Pset_ConstructionOccurence.TagNumber,27,4211,0.6
+Pset_FanTypeCommon.Reference,24,4211,0.6
+GTAA_COBie.COBie.Type.ModelNumber,21,4211,0.5
+GTAA_COBie.COBie.Type.Name,21,4211,0.5
+GTAA_PACT.Parent Element,19,4211,0.5
+Pset_ElectricalDeviceCommon.NumberOfPoles,22,4211,0.5
+Pset_UnitaryEquipmentTypeCommon.Reference,22,4211,0.5
+Pset_SpaceHeaterTypeCommon.Reference,15,4211,0.4
+Pset_ReinforcementBarPitchOfSlab.Reference,8,4211,0.2
+Pset_SlabCommon.IsExternal,8,4211,0.2
+Pset_SlabCommon.Reference,8,4211,0.2
+Pset_ValveTypeCommon.Size,10,4211,0.2
+GTAA_AGL.Panel Legend,4,4211,0.1
+Pset_ConstructionOccurence.ModelNumber,4,4211,0.1
+Pset_DistributionChamberElementCommon.Reference,5,4211,0.1
+Pset_DistributionChamberElementTypeSump.Length,3,4211,0.1
+Pset_DistributionChamberElementTypeSump.Width,3,4211,0.1
+Pset_ElectricApplianceTypeCommon.Reference,5,4211,0.1
+Pset_SanitaryTerminalTypeCommon.Reference,6,4211,0.1
+GTAA_COBie.COBie.Component.Space,2,4211,0
+GTAA_PACT.Feeder Buss,1,4211,0
+GTAA_PACT.GDB Asset Number,1,4211,0
+Pset_AlarmTypeCommon.Reference,2,4211,0
+Pset_DistributionBoardTypeCommon.Reference,1,4211,0
+Pset_InterceptorTypeCommon.Reference,1,4211,0
+Pset_MedicalDeviceTypeCommon.Reference,1,4211,0
+Pset_TankTypeCommon.Reference,2,4211,0

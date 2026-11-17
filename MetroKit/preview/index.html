@@ -13,8 +13,9 @@
     .hint {
       position: absolute; left: 12px; top: 12px; z-index: 2;
       background: rgba(255,255,255,.92); padding: 8px 10px;
-      font: 13px/1.4 Segoe UI, sans-serif; max-width: 360px;
+      font: 13px/1.4 Segoe UI, sans-serif; max-width: 420px;
     }
+    #status { margin-top: 6px; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -23,15 +24,30 @@
   <div class="hint">
     <strong>xeokit preview</strong>
     <div>Orbit drag · pan right-drag or middle · wheel zoom · cube faces snap camera · double-click an object to fly.</div>
+    <div id="status">Loading 1.ifc…</div>
   </div>
   <script type="module">
-    import { Viewer, NavCubePlugin } from "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.es.min.js";
+    import { Viewer, NavCubePlugin, WebIFCLoaderPlugin } from "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.es.min.js";
+    import * as WebIFC from "https://cdn.jsdelivr.net/npm/web-ifc@0.0.51/web-ifc-api.js";
+
+    const statusEl = document.getElementById("status");
+    const setStatus = (message) => { statusEl.textContent = message; };
+
+    window.addEventListener("error", (event) => {
+      const stack = event.error && event.error.stack ? "\n" + event.error.stack : "";
+      setStatus((event.message || "Preview error") + " @ " + (event.filename || "") + ":" + (event.lineno || "") + stack);
+    });
+    window.addEventListener("unhandledrejection", (event) => {
+      const reason = event.reason;
+      setStatus(reason instanceof Error ? reason.message : String(reason));
+    });
 
     const viewer = new Viewer({ canvasId: "myCanvas", transparent: false, dtxEnabled: true });
-    viewer.scene.canvas.backgroundColor = [216/255, 228/255, 238/255];
+    viewer.scene.canvas.backgroundColor = [216 / 255, 228 / 255, 238 / 255];
     viewer.cameraControl.followPointer = true;
     viewer.cameraControl.doublePickFlyTo = true;
     viewer.cameraControl.navMode = "orbit";
+    viewer.cameraControl.panRightClick = true;
 
     new NavCubePlugin(viewer, {
       canvasId: "myNavCubeCanvas",
@@ -46,6 +62,51 @@
       viewer.scene.setObjectsHighlighted(viewer.scene.objectIds, false);
       viewer.scene.setObjectsHighlighted([hit.entity.id], true);
     });
+
+    try {
+      const IfcAPI = new WebIFC.IfcAPI();
+      IfcAPI.SetWasmPath("https://cdn.jsdelivr.net/npm/web-ifc@0.0.51/");
+      await IfcAPI.Init();
+
+      setStatus("Loading 1.ifc…");
+      const response = await fetch("./1.ifc");
+      if (!response.ok) {
+        throw new Error(`Model URL returned ${response.status} for ./1.ifc`);
+      }
+      // web-ifc 0.0.51 (the build xeokit 2.6.114 expects) rejects IFC4X3_ADD2.
+      // The file's entities parse when the header schema is read as IFC4X3.
+      let ifcText = await response.text();
+      if (ifcText.includes("FILE_SCHEMA(('IFC4X3_ADD2'))")) {
+        ifcText = ifcText.replace("FILE_SCHEMA(('IFC4X3_ADD2'))", "FILE_SCHEMA(('IFC4X3'))");
+      }
+      const bytes = new TextEncoder().encode(ifcText);
+      const ifc = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+
+      setStatus("Parsing model…");
+      const loader = new WebIFCLoaderPlugin(viewer, { WebIFC, IfcAPI });
+      const model = loader.load({
+        id: "metrokit-model",
+        ifc,
+        edges: true,
+        saoEnabled: true,
+        excludeUnclassifiedObjects: false,
+        excludeTypes: ["IfcSpace"],
+        loadMetadata: true
+      });
+
+      model.on("loaded", () => {
+        const count = viewer.scene.objectIds.length;
+        viewer.cameraFlight.jumpTo({ aabb: viewer.scene.aabb, fit: true });
+        setStatus(count
+          ? `Loaded 1.ifc · ${count} objects`
+          : "Loaded 1.ifc · no geometry");
+      });
+      model.on("error", (error) => {
+        setStatus(error instanceof Error ? error.message : String(error || "Model failed to parse."));
+      });
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : String(error));
+    }
   </script>
 </body>
 </html>

@@ -1,0 +1,498 @@
+"use strict";
+
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
+
+const ifcPath = process.argv[2] || path.join(__dirname, "..", "preview", "1.ifc");
+const csvPath = process.argv[3] || path.join(__dirname, "..", "preview", "1-elements.csv");
+
+const NON_ELEMENT = new Set([
+    "IFCPROJECT",
+    "IFCSITE",
+    "IFCBUILDING",
+    "IFCBUILDINGSTOREY",
+    "IFCSPACE",
+    "IFCSPATIALZONE",
+    "IFCDISTRIBUTIONPORT",
+    "IFCOPENINGELEMENT",
+    "IFCDISTRIBUTIONSYSTEM",
+    "IFCGROUP",
+    "IFCSYSTEM",
+    "IFCZONE"
+]);
+
+const SKIP_GEOMETRY = /POINT|DIRECTION|AXIS2|PLACEMENT|PROFILEDEF|EXTRUDED|REPRESENTATION|COLOUR|STYLE|MAPPEDITEM|CURVE|FACE|POLYLOOP|VERTEX|EDGE|SHELL|PLANE|SURFACE|TRANSFORMATION|CIRCLE|VECTOR|GEOMETRIC|PRESENTATION|FILL|TRIMMED|COMPOSITE|BOOLEAN|HALFSPACE|TESSELLAT|TRIANGULAT|INDEXEDPOLY|CARTESIAN|SIUNIT|CONVERSIONBASED|DIMENSIONAL|MEASUREWITHUNIT|UNITASSIGNMENT|OWNERHISTORY|PERSON|ORGANIZATION|APPLICATION|POSTALADDRESS|CLASSIFICATION|MAPCONVERSION|PROJECTEDCRS|CONTEXT|ANNOTATION|CONNECTIONGEOMETRY|FEATUREELEMENT/;
+
+const TYPE_WORDS = [
+    "BuildingElementProxy", "DistributionChamberElement", "ElectricDistributionBoard",
+    "FireSuppressionTerminal", "AirTerminalBox", "UnitaryEquipment", "SanitaryTerminal",
+    "WasteTerminal", "SpaceHeater", "CableCarrierSegment", "CableCarrierFitting",
+    "PipeSegment", "PipeFitting", "DuctSegment", "DuctFitting", "AirTerminal",
+    "FlowTerminal", "BuiltElement", "BuildingElement", "Covering", "Damper", "Valve",
+    "Slab", "Tank", "Alarm", "Fan"
+].sort((a, b) => b.length - a.length);
+
+function splitTop(body) {
+    const parts = [];
+    let cur = "";
+    let depth = 0;
+    let inStr = false;
+    for (let i = 0; i < body.length; i++) {
+        const c = body[i];
+        if (inStr) {
+            cur += c;
+            if (c === "'") {
+                if (body[i + 1] === "'") {
+                    cur += "'";
+                    i++;
+                } else {
+                    inStr = false;
+                }
+            }
+            continue;
+        }
+        if (c === "'") {
+            inStr = true;
+            cur += c;
+            continue;
+        }
+        if (c === "(") {
+            depth++;
+            cur += c;
+            continue;
+        }
+        if (c === ")") {
+            depth--;
+            cur += c;
+            continue;
+        }
+        if (c === "," && depth === 0) {
+            parts.push(cur.trim());
+            cur = "";
+            continue;
+        }
+        cur += c;
+    }
+    if (cur.trim()) {
+        parts.push(cur.trim());
+    }
+    return parts;
+}
+
+function decode(raw) {
+    if (raw == null) {
+        return null;
+    }
+    const text = String(raw).trim();
+    if (text === "" || text === "$" || text === "*") {
+        return null;
+    }
+    if (text.startsWith("'") && text.endsWith("'")) {
+        return text.slice(1, -1).replace(/''/g, "'");
+    }
+    if (text.startsWith("#")) {
+        return { ref: Number(text.slice(1)) };
+    }
+    if (text.startsWith("(") && text.endsWith(")")) {
+        return splitTop(text.slice(1, -1)).map(decode);
+    }
+    if (text.startsWith(".") && text.endsWith(".")) {
+        return text.slice(1, -1);
+    }
+    const typed = text.match(/^([A-Z0-9_]+)\((.*)\)$/s);
+    if (typed) {
+        return decode(typed[2]);
+    }
+    if (/^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(text)) {
+        return Number(text);
+    }
+    return text;
+}
+
+function parseEntities(ifcText) {
+    const dataStart = ifcText.indexOf("DATA;");
+    const dataEnd = ifcText.indexOf("ENDSEC;", dataStart);
+    const data = ifcText.slice(dataStart, dataEnd);
+    const entities = new Map();
+    let i = 0;
+    while (i < data.length) {
+        const hash = data.indexOf("#", i);
+        if (hash < 0) {
+            break;
+        }
+        const eq = data.indexOf("=", hash);
+        if (eq < 0) {
+            break;
+        }
+        const idText = data.slice(hash + 1, eq).trim();
+        if (!/^\d+$/.test(idText)) {
+            i = hash + 1;
+            continue;
+        }
+        let j = eq + 1;
+        while (j < data.length && /\s/.test(data[j])) {
+            j++;
+        }
+        const nameStart = j;
+        while (j < data.length && /[A-Z0-9_]/.test(data[j])) {
+            j++;
+        }
+        const name = data.slice(nameStart, j);
+        const open = data.indexOf("(", j);
+        if (!name || open < 0) {
+            i = hash + 1;
+            continue;
+        }
+        let depth = 0;
+        let inStr = false;
+        let end = open;
+        for (; end < data.length; end++) {
+            const c = data[end];
+            if (inStr) {
+                if (c === "'" && data[end + 1] === "'") {
+                    end++;
+                    continue;
+                }
+                if (c === "'") {
+                    inStr = false;
+                }
+                continue;
+            }
+            if (c === "'") {
+                inStr = true;
+                continue;
+            }
+            if (c === "(") {
+                depth++;
+            } else if (c === ")") {
+                depth--;
+                if (depth === 0) {
+                    end++;
+                    break;
+                }
+            }
+        }
+        const args = splitTop(data.slice(open + 1, end - 1)).map(decode);
+        entities.set(Number(idText), { name, args });
+        i = end;
+    }
+    return entities;
+}
+
+function refId(value) {
+    return value && typeof value === "object" && "ref" in value ? value.ref : null;
+}
+
+function refList(value) {
+    if (!Array.isArray(value)) {
+        const id = refId(value);
+        return id == null ? [] : [id];
+    }
+    return value.map(refId).filter((id) => id != null);
+}
+
+function cell(value) {
+    if (value == null || value === "") {
+        return "";
+    }
+    if (typeof value === "boolean") {
+        return value ? "TRUE" : "FALSE";
+    }
+    const text = String(value);
+    if (/[",\r\n]/.test(text)) {
+        return `"${text.replace(/"/g, '""')}"`;
+    }
+    return text;
+}
+
+function propertyValue(nominal) {
+    if (nominal === "T") {
+        return true;
+    }
+    if (nominal === "F") {
+        return false;
+    }
+    if (Array.isArray(nominal)) {
+        return nominal.filter((item) => item != null && item !== "").join("; ");
+    }
+    return nominal;
+}
+
+function keepEntity(name) {
+    if (name.startsWith("IFCREL") || name.startsWith("IFCPROPERTY") || name.startsWith("IFCMATERIAL") || name.startsWith("IFCQUANTITY")) {
+        return true;
+    }
+    if (name === "IFCBUILDINGSTOREY" || name === "IFCBUILDING" || name === "IFCSITE") {
+        return true;
+    }
+    if (name.endsWith("TYPE") || SKIP_GEOMETRY.test(name)) {
+        return false;
+    }
+    return true;
+}
+
+function statementClosed(statement) {
+    let depth = 0;
+    let inStr = false;
+    for (let i = 0; i < statement.length; i++) {
+        const c = statement[i];
+        if (inStr) {
+            if (c === "'" && statement[i + 1] === "'") {
+                i++;
+                continue;
+            }
+            if (c === "'") {
+                inStr = false;
+            }
+            continue;
+        }
+        if (c === "'") {
+            inStr = true;
+            continue;
+        }
+        if (c === "(") {
+            depth++;
+        } else if (c === ")") {
+            depth--;
+        }
+    }
+    return depth === 0 && statement.endsWith(";");
+}
+
+function loadEntities(filePath) {
+    return new Promise((resolve, reject) => {
+        const entities = new Map();
+        const input = readline.createInterface({
+            input: fs.createReadStream(filePath),
+            crlfDelay: Infinity
+        });
+        let buffer = "";
+        input.on("line", (line) => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed === "DATA;" || trimmed === "ENDSEC;" || trimmed === "END-ISO-10303-21;") {
+                return;
+            }
+            if (!buffer && !trimmed.startsWith("#")) {
+                return;
+            }
+            buffer = buffer ? buffer + trimmed : trimmed;
+            if (!statementClosed(buffer)) {
+                return;
+            }
+            const head = buffer.match(/^#(\d+)=([A-Z0-9_]+)\(/);
+            if (head && keepEntity(head[2])) {
+                const parsed = parseEntities(`DATA;\n${buffer}\nENDSEC;`);
+                const record = parsed.get(Number(head[1]));
+                if (record) {
+                    entities.set(Number(head[1]), record);
+                }
+            }
+            buffer = "";
+        });
+        input.on("close", () => resolve(entities));
+        input.on("error", reject);
+    });
+}
+
+function readProperty(prop) {
+    if (!prop || typeof prop.args[0] !== "string") {
+        return null;
+    }
+    if (prop.name === "IFCPROPERTYSINGLEVALUE") {
+        return [prop.args[0], propertyValue(prop.args[2])];
+    }
+    if (prop.name === "IFCPROPERTYBOUNDEDVALUE") {
+        const upper = propertyValue(prop.args[2]);
+        const lower = propertyValue(prop.args[3]);
+        const setPoint = propertyValue(prop.args[5]);
+        const value = upper != null ? upper : lower != null ? lower : setPoint;
+        return [prop.args[0], value];
+    }
+    if (prop.name === "IFCPROPERTYENUMERATEDVALUE") {
+        return [prop.args[0], propertyValue(prop.args[2])];
+    }
+    return null;
+}
+
+function typeLabel(name) {
+    let rest = name.startsWith("IFC") ? name.slice(3) : name;
+    const parts = ["Ifc"];
+    while (rest) {
+        const word = TYPE_WORDS.find((item) => rest.toUpperCase().startsWith(item.toUpperCase()));
+        if (!word) {
+            parts.push(rest.charAt(0) + rest.slice(1).toLowerCase());
+            break;
+        }
+        parts.push(word);
+        rest = rest.slice(word.length);
+    }
+    return parts.join("");
+}
+
+function isExportedElement(entity) {
+    if (!entity || entity.name.endsWith("TYPE") || NON_ELEMENT.has(entity.name)) {
+        return false;
+    }
+    if (entity.name.startsWith("IFCREL") || entity.name.startsWith("IFCPROPERTY") || entity.name.startsWith("IFCMATERIAL") || entity.name.startsWith("IFCQUANTITY")) {
+        return false;
+    }
+    return typeof entity.args[0] === "string" && entity.args[0].length >= 20 && entity.args.length >= 8;
+}
+
+async function main() {
+const entities = await loadEntities(ifcPath);
+const psets = new Map();
+const propsOn = new Map();
+const typeOf = new Map();
+const storeyOf = new Map();
+const materialOf = new Map();
+
+for (const [id, entity] of entities) {
+    if (entity.name === "IFCPROPERTYSET") {
+        const propIds = refList(entity.args[4]);
+        const props = {};
+        for (const propId of propIds) {
+            const read = readProperty(entities.get(propId));
+            if (!read || read[1] == null || read[1] === "") {
+                continue;
+            }
+            props[read[0]] = read[1];
+        }
+        psets.set(id, { name: entity.args[2] || `Pset_${id}`, props });
+    }
+}
+
+function addProps(targetId, psetId, override) {
+    const pset = psets.get(psetId);
+    if (!pset) {
+        return;
+    }
+    if (!propsOn.has(targetId)) {
+        propsOn.set(targetId, {});
+    }
+    const bag = propsOn.get(targetId);
+    for (const [key, value] of Object.entries(pset.props)) {
+        const column = `${pset.name}.${key}`;
+        if (override || bag[column] == null) {
+            bag[column] = value;
+        }
+    }
+}
+
+for (const entity of entities.values()) {
+    if (entity.name !== "IFCRELDEFINESBYPROPERTIES") {
+        continue;
+    }
+    const objects = refList(entity.args[4]);
+    const psetId = refId(entity.args[5]);
+    for (const objectId of objects) {
+        addProps(objectId, psetId, true);
+    }
+}
+
+for (const entity of entities.values()) {
+    if (entity.name !== "IFCRELDEFINESBYTYPE") {
+        continue;
+    }
+    const objects = refList(entity.args[4]);
+    const typeId = refId(entity.args[5]);
+    for (const objectId of objects) {
+        typeOf.set(objectId, typeId);
+        const inherited = propsOn.get(typeId) || {};
+        if (!propsOn.has(objectId)) {
+            propsOn.set(objectId, {});
+        }
+        const bag = propsOn.get(objectId);
+        for (const [column, value] of Object.entries(inherited)) {
+            if (bag[column] == null) {
+                bag[column] = value;
+            }
+        }
+    }
+}
+
+for (const entity of entities.values()) {
+    if (entity.name === "IFCRELCONTAINEDINSPATIALSTRUCTURE") {
+        const storey = entities.get(refId(entity.args[5]));
+        const storeyName = storey ? storey.args[2] : "";
+        for (const objectId of refList(entity.args[4])) {
+            storeyOf.set(objectId, storeyName || "");
+        }
+    }
+    if (entity.name === "IFCRELASSOCIATESMATERIAL") {
+        const material = entities.get(refId(entity.args[5]));
+        const materialName = material && material.name === "IFCMATERIAL" ? material.args[0] : "";
+        for (const objectId of refList(entity.args[4])) {
+            if (materialName) {
+                materialOf.set(objectId, materialName);
+            }
+        }
+    }
+}
+
+for (const [objectId, typeId] of typeOf) {
+    if (!materialOf.has(objectId) && materialOf.has(typeId)) {
+        materialOf.set(objectId, materialOf.get(typeId));
+    }
+}
+
+const rows = [];
+const columns = new Set();
+for (const [id, entity] of entities) {
+    if (!isExportedElement(entity)) {
+        continue;
+    }
+    const props = propsOn.get(id) || {};
+    Object.keys(props).forEach((column) => columns.add(column));
+    rows.push({
+        id,
+        globalId: entity.args[0] || "",
+        name: entity.args[2] || "",
+        type: typeLabel(entity.name),
+        objectType: entity.args[4] || "",
+        tag: entity.args[7] || "",
+        predefinedType: entity.args[8] || "",
+        storey: storeyOf.get(id) || "",
+        material: materialOf.get(id) || "",
+        props
+    });
+}
+
+rows.sort((a, b) => String(a.globalId).localeCompare(String(b.globalId)));
+const propColumns = [...columns].sort();
+const header = [
+    "Object ID",
+    "Name",
+    "Type",
+    "Object Type",
+    "Tag",
+    "Predefined Type",
+    "Storey",
+    "Material",
+    ...propColumns
+];
+
+const lines = [header.map(cell).join(",")];
+for (const row of rows) {
+    lines.push([
+        row.globalId,
+        row.name,
+        row.type,
+        row.objectType,
+        row.tag,
+        row.predefinedType,
+        row.storey,
+        row.material,
+        ...propColumns.map((column) => row.props[column])
+    ].map(cell).join(","));
+}
+
+fs.writeFileSync(csvPath, `\uFEFF${lines.join("\r\n")}\r\n`, "utf8");
+console.log(`Wrote ${rows.length} elements, ${propColumns.length} parameters, to ${csvPath}`);
+}
+
+main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
