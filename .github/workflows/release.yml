@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Package MetroMap
+        working-directory: MetroMap
+        run: |
+          npm ci
+          npm run package
+
+      - name: Package MetroKit
+        working-directory: MetroKit
+        run: |
+          npm ci
+          npm run package
+
+      - name: Package MetroD3
+        working-directory: MetroD3
+        run: |
+          npm ci
+          npm run package
+
+      - name: Build MetroKit-Excel
+        working-directory: MetroKit-Excel
+        run: |
+          npm ci
+          npm run build
+
+      - name: Collect release files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release | Out-Null
+          $map = (Get-Content MetroMap\package.json -Raw | ConvertFrom-Json).version
+          $kit = (Get-Content MetroKit\package.json -Raw | ConvertFrom-Json).version
+          $d3 = (Get-Content MetroD3\package.json -Raw | ConvertFrom-Json).version
+          $excelLine = Select-String -Path MetroKit-Excel\src\version.ts -Pattern 'METROKIT_EXCEL_VERSION = "([^"]+)"'
+          $excel = $excelLine.Matches[0].Groups[1].Value
+
+          function Copy-Package($folder, $label, $version) {
+            $match = Get-ChildItem "$folder\dist\*.$version.pbiviz" | Select-Object -First 1
+            if (-not $match) { throw "No $label package at version $version" }
+            Copy-Item $match.FullName "release\$label-$version.pbiviz"
+          }
+
+          Copy-Package MetroMap MetroMap $map
+          Copy-Package MetroKit MetroKit $kit
+          Copy-Package MetroD3 MetroD3 $d3
+
+          $stage = "release\excel"
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          $dist = (Resolve-Path MetroKit-Excel\dist).Path
+          Get-ChildItem MetroKit-Excel\dist -Recurse -File | Where-Object { $_.Extension -ne ".map" } | ForEach-Object {
+            $rel = $_.FullName.Substring($dist.Length).TrimStart("\")
+            $dest = Join-Path $stage $rel
+            New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+            Copy-Item $_.FullName $dest
+          }
+          Compress-Archive -Path $stage -DestinationPath "release\MetroKit-Excel-$excel.zip"
+
+          @(
+            "Packages for every MetroBI folder."
+            ""
+            "| Folder | Version | File |"
+            "| --- | --- | --- |"
+            "| MetroMap | $map | MetroMap-$map.pbiviz |"
+            "| MetroKit | $kit | MetroKit-$kit.pbiviz |"
+            "| MetroD3 | $d3 | MetroD3-$d3.pbiviz |"
+            "| MetroKit-Excel | $excel | MetroKit-Excel-$excel.zip |"
+            ""
+            "Import each .pbiviz in Power BI: Get more visuals, then import a visual from a file."
+            ""
+            "MetroKit-Excel is the built add-in. Unzip it and sideload both manifests. Those manifests still load the viewer from https://localhost:3000, so run npm run dev-server in MetroKit-Excel after sideloading, or host the unzipped files and point the manifest URLs at that host."
+          ) -join "`n" | Set-Content -Path release\NOTES.md -Encoding utf8
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $assets = @(Get-ChildItem release -File | Where-Object { $_.Extension -in ".pbiviz", ".zip" } | ForEach-Object { $_.FullName })
+          gh release create "${{ github.ref_name }}" --title "MetroBI ${{ github.ref_name }}" --notes-file release\NOTES.md @assets
