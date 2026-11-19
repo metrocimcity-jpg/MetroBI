@@ -11,7 +11,7 @@ In `MetroKit/capabilities.json`:
 - `dataViewMappings.conditions` includes an empty `{}` plus the field-well condition
 - `WebAccess` includes `https://*`, `http://*`, **and** explicit localhost / 127.0.0.1 (with and without `:80` / `:*`). `http://*` does **not** include localhost
 
-Power BI’s Format pane **cannot** host a file picker. Do not add an in-visual Browse sidebar unless the user asks. Models load from **Format → Model → Model URL**.
+Do not add a Browse slice to the Format pane. `FormattingComponent.Link` crashes Power BI Desktop when clicked. Browse is a real `<input type="file">` on the viewer toolbar. It POSTs the file to `https://localhost:8091/upload` and `persistProperties` the returned URL onto `model.url`. The preview server must be running.
 
 ## Required code
 

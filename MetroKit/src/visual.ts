@@ -16,6 +16,7 @@ import { mapDataView } from "./dataView";
 import { XeokitViewerController } from "./xeokitViewer";
 import { applyFormattingObjects, enumerateObjectCard, readPersistedModelUrl } from "./format";
 import { forceNullSelectors } from "./formattingModel";
+import { isModelFile, uploadModelFile } from "./browseModel";
 import { METROKIT_VERSION } from "./version";
 
 function readMetadataObjects(
@@ -47,7 +48,10 @@ export class Visual implements IVisual {
             options.element,
             this.selectionManager,
             () => Boolean(this.host.hostCapabilities?.allowInteractions !== false),
-            METROKIT_VERSION
+            METROKIT_VERSION,
+            (file) => {
+                void this.copyBrowsedModel(file);
+            }
         );
     }
 
@@ -83,6 +87,29 @@ export class Visual implements IVisual {
         return forceNullSelectors(
             this.formattingSettingsService.buildFormattingModel(this.formattingSettings)
         );
+    }
+
+    private async copyBrowsedModel(file: File): Promise<void> {
+        if (!isModelFile(file.name)) {
+            this.viewerController.setStatus("Choose an .ifc, .xkt, .glb, or .gltf file.");
+            return;
+        }
+        this.viewerController.setStatus(`Copying ${file.name}…`);
+        try {
+            const url = await uploadModelFile(file, (percent) => {
+                this.viewerController.setStatus(`Copying ${file.name}… ${percent}%`);
+            });
+            this.formattingSettings.model.url.value = url;
+            this.host.persistProperties({
+                merge: [{
+                    objectName: "model",
+                    selector: null as unknown as powerbi.data.Selector,
+                    properties: { url }
+                }]
+            });
+        } catch (error) {
+            this.viewerController.setStatus(error instanceof Error ? error.message : String(error));
+        }
     }
 
     public enumerateObjectInstances(

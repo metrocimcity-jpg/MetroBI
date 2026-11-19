@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browse a model</title>
+    <style>
+        body {
+            margin: 32px;
+            max-width: 760px;
+            color: #1b1b1b;
+            font: 16px "Segoe UI", sans-serif;
+        }
+        button {
+            font: inherit;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        #file {
+            display: none;
+        }
+        #url {
+            flex: 1;
+            padding: 10px 12px;
+            background: #f4f4f4;
+            font-family: Consolas, monospace;
+            word-break: break-all;
+        }
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        #status {
+            min-height: 1.4em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Browse a model</h1>
+    <p>Choose an IFC, XKT, or glTF file. It is copied into the preview folder, and this page shows the model URL.</p>
+    <p>Paste that URL into Power BI: <strong>Format → Model → Model URL</strong>, then press Enter.</p>
+    <input id="file" type="file" accept=".ifc,.xkt,.glb,.gltf">
+    <p><button id="browse" type="button">Browse</button></p>
+    <p id="status"></p>
+    <div id="result" hidden>
+        <div class="row">
+            <div id="url"></div>
+            <button id="copy" type="button">Copy</button>
+        </div>
+    </div>
+    <script>
+        const input = document.getElementById("file");
+        const status = document.getElementById("status");
+        const result = document.getElementById("result");
+        const urlEl = document.getElementById("url");
+
+        document.getElementById("browse").addEventListener("click", () => input.click());
+
+        input.addEventListener("change", () => {
+            const file = input.files && input.files[0];
+            input.value = "";
+            if (!file) {
+                return;
+            }
+            status.textContent = "Copying " + file.name + "…";
+            result.hidden = true;
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload?name=" + encodeURIComponent(file.name));
+            xhr.setRequestHeader("Content-Type", "application/octet-stream");
+            xhr.upload.onprogress = (event) => {
+                if (!event.lengthComputable) {
+                    return;
+                }
+                const percent = Math.round(100 * event.loaded / event.total);
+                status.textContent = "Copying " + file.name + "… " + percent + "%";
+            };
+            xhr.onload = () => {
+                let body = {};
+                try {
+                    body = JSON.parse(xhr.responseText);
+                } catch (error) {
+                    body = {};
+                }
+                if (xhr.status !== 200 || !body.url) {
+                    status.textContent = body.error || "The copy failed.";
+                    return;
+                }
+                status.textContent = "Copied into preview.";
+                urlEl.textContent = body.url;
+                result.hidden = false;
+            };
+            xhr.onerror = () => {
+                status.textContent = "The copy failed.";
+            };
+            xhr.send(file);
+        });
+
+        document.getElementById("copy").addEventListener("click", async () => {
+            const url = urlEl.textContent;
+            try {
+                await navigator.clipboard.writeText(url);
+                status.textContent = "URL copied.";
+            } catch (error) {
+                status.textContent = "Select the URL and copy it.";
+            }
+        });
+    </script>
+</body>
+</html>

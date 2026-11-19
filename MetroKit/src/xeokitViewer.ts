@@ -36,6 +36,7 @@ type LoadCfg = {
 export class XeokitViewerController {
     private readonly canvas: HTMLCanvasElement;
     private readonly cubeCanvas: HTMLCanvasElement;
+    private readonly browseBar: HTMLElement;
     private readonly statusEl: HTMLElement;
     private readonly infoEl: HTMLElement;
     private viewer: Viewer | undefined;
@@ -53,9 +54,30 @@ export class XeokitViewerController {
         private readonly hostElement: HTMLElement,
         private readonly selectionManager: ISelectionManager,
         private readonly allowInteractions: () => boolean,
-        version: string
+        version: string,
+        onFile: (file: File) => void
     ) {
         this.hostElement.classList.add("metrokit-host");
+
+        this.browseBar = document.createElement("div");
+        this.browseBar.className = "metrokit-browse";
+        const browseLabel = document.createElement("label");
+        browseLabel.className = "metrokit-browse-button";
+        browseLabel.textContent = "Browse";
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = ".ifc,.xkt,.glb,.gltf";
+        fileInput.className = "metrokit-browse-input";
+        fileInput.addEventListener("change", () => {
+            const file = fileInput.files && fileInput.files[0];
+            fileInput.value = "";
+            if (file) {
+                onFile(file);
+            }
+        });
+        browseLabel.appendChild(fileInput);
+        this.browseBar.appendChild(browseLabel);
+        this.hostElement.appendChild(this.browseBar);
 
         this.canvas = document.createElement("canvas");
         this.canvas.className = "metrokit-canvas";
@@ -84,8 +106,8 @@ export class XeokitViewerController {
         if (!this.viewer) {
             return;
         }
-        const width = Math.max(1, this.hostElement.clientWidth);
-        const height = Math.max(1, this.hostElement.clientHeight);
+        const width = Math.max(1, this.canvas.clientWidth || this.hostElement.clientWidth);
+        const height = Math.max(1, this.canvas.clientHeight || (this.hostElement.clientHeight - this.browseBar.offsetHeight));
         this.canvas.width = width;
         this.canvas.height = height;
         this.viewer.scene.render(true);
@@ -357,7 +379,7 @@ export class XeokitViewerController {
         this.infoEl.style.display = "none";
     }
 
-    private setStatus(message: string): void {
+    public setStatus(message: string): void {
         this.statusEl.textContent = message;
         this.statusEl.style.display = message ? "block" : "none";
     }

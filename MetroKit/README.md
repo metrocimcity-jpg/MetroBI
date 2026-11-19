@@ -33,7 +33,7 @@ It loads **XKT**, **glTF/GLB**, and **IFC**, with orbit/pan/zoom, object pick, a
 - **Appearance** — background, highlight, X-ray others
 - **Selection** — cross-filter on pick
 
-Paste a model URL in Format → Model → Model URL (or bind the Model URL field well). Settings persist with **no fields bound**. HTTPS hosts and `http://localhost` / `http://127.0.0.1` are allowed. The model host must send CORS headers. Power BI needs the visual’s `WebAccess` privilege. After changing the URL, press Enter or click outside the box so the value commits. There is no Browse/file picker in the Format pane.
+Paste a model URL in Format → Model → Model URL (or bind the Model URL field well). Settings persist with **no fields bound**. HTTPS hosts and `http://localhost` / `http://127.0.0.1` are allowed. The model host must send CORS headers. Power BI needs the visual’s `WebAccess` privilege. After changing the URL, press Enter or click outside the box so the value commits. The **Browse** button is on the top edge of the viewer. It copies the chosen `.ifc`, `.xkt`, `.glb`, or `.gltf` file into `preview/` and writes `https://localhost:8091/...` into Model URL. `npm run preview:https` must be running. A Browse row in the Format pane crashes Power BI, so it is not there. `https://localhost:8091/browse.html` does the same copy outside Power BI.
 
 ## Chart highlight
 
@@ -62,7 +62,7 @@ npm run package
 npm run preview:https
 ```
 
-`npm run package` applies `scripts/patch-pbiviz-webpack.cjs` (`fs`/`path` fallbacks, certificate shell). Import `MetroKit/dist/*.pbiviz` in Power BI Desktop (enable **Develop a visual**). Current visual version is **1.0.11.0**.
+`npm run package` applies `scripts/patch-pbiviz-webpack.cjs` (`fs`/`path` fallbacks, certificate shell). Import `MetroKit/dist/*.pbiviz` in Power BI Desktop (enable **Develop a visual**). Current visual version is **1.0.14.0**.
 
 `npm run preview:https` serves `preview/` at `https://localhost:8091`, including the IFC WASM the visual loads. Standalone preview without Power BI: open `preview/index.html` (that page loads xeokit and web-ifc from jsDelivr).
 

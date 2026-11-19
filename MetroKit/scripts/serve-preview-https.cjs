@@ -20,6 +20,89 @@ const types = {
     ".html": "text/html; charset=utf-8"
 };
 
+const modelExtensions = new Set([".ifc", ".xkt", ".glb", ".gltf"]);
+
+function safeModelName(raw) {
+    const base = String(raw || "").replace(/^\uFEFF/, "").trim();
+    if (!base || base !== path.basename(base) || base.includes("..") || /[\\/:*?"<>|]/.test(base)) {
+        return null;
+    }
+    if (!modelExtensions.has(path.extname(base).toLowerCase())) {
+        return null;
+    }
+    return base;
+}
+
+function sendJson(res, status, body) {
+    res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify(body));
+}
+
+function uploadModel(req, res) {
+    let name = null;
+    try {
+        name = safeModelName(new URL(req.url || "/", "https://localhost").searchParams.get("name"));
+    } catch {
+        name = null;
+    }
+    if (!name) {
+        sendJson(res, 400, { error: "Choose an .ifc, .xkt, .glb, or .gltf file." });
+        return;
+    }
+
+    const dest = path.join(root, name);
+    const tmp = `${dest}.uploading`;
+    const out = fs.createWriteStream(tmp);
+    let failed = false;
+    let bytes = 0;
+
+    function fail(status, message) {
+        if (failed) {
+            return;
+        }
+        failed = true;
+        req.unpipe(out);
+        out.destroy();
+        fs.rm(tmp, { force: true }, () => {});
+        if (!res.headersSent) {
+            sendJson(res, status, { error: message });
+        }
+    }
+
+    req.on("data", (chunk) => {
+        bytes += chunk.length;
+    });
+    req.on("error", () => fail(400, "The copy stopped before the file finished."));
+    out.on("error", () => fail(500, "Could not save the file in preview."));
+    req.pipe(out);
+    out.on("finish", () => {
+        if (failed) {
+            return;
+        }
+        if (bytes === 0) {
+            fail(400, "That file is empty.");
+            return;
+        }
+        fs.rm(dest, { force: true }, (rmErr) => {
+            if (rmErr || failed) {
+                fail(500, "Could not save the file in preview.");
+                return;
+            }
+            fs.rename(tmp, dest, (renameErr) => {
+                if (renameErr || failed) {
+                    fs.rm(tmp, { force: true }, () => {});
+                    fail(500, "Could not save the file in preview.");
+                    return;
+                }
+                sendJson(res, 200, {
+                    name,
+                    url: `https://localhost:${port}/${encodeURIComponent(name)}`
+                });
+            });
+        });
+    });
+}
+
 function loadTls() {
     const pfxPath = path.join(certDir, "PowerBICustomVisualTest_public.pfx");
     const passPath = path.join(certDir, "PowerBICustomVisualTestPass.txt");
@@ -47,6 +130,10 @@ function handler(req, res) {
     if (req.method === "OPTIONS") {
         res.writeHead(204);
         res.end();
+        return;
+    }
+    if (req.method === "POST" && (req.url || "").split("?")[0] === "/upload") {
+        uploadModel(req, res);
         return;
     }
     if (req.method === "POST" && (req.url || "").split("?")[0] === "/__debug") {
@@ -116,6 +203,7 @@ function listen(host) {
     });
     server.listen(port, host, () => {
         console.log(`MetroKit preview HTTPS on ${host}:${port}`);
+        console.log(`Browse: https://localhost:${port}/browse.html`);
         console.log(`Model URL: https://localhost:${port}/1.ifc`);
     });
 }
